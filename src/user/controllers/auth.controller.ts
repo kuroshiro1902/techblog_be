@@ -102,6 +102,30 @@ const AuthController = {
       data: User.dto(user),
     });
   },
+
+  async refreshToken(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'UNAUTHORIZED.' });
+      }
+      const user = await UserService.findOneBy({ id: userId });
+      if (!user) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Người dùng không tồn tại!' });
+      }
+      const token = AuthService.generateAccessToken({ id: user.id });
+      return res.json({
+        isSuccess: true,
+        data: { token, user: User.dto(user) },
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
 };
 
 export default AuthController;

@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { ENVIRONMENT } from '@/common/environments/environment';
 import { ITokenPayload } from '../models/user.model';
 
-const accessTokenExpiresIn = '7d';
+const accessTokenExpiresIn = '3d';
 // const accessTokenExpiresIn = '30m';
 const refreshTokenExpiresIn = '7d';
 const passwordSalt = ENVIRONMENT.passwordSalt;
