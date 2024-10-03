@@ -71,7 +71,7 @@ export class UserModel extends Model<IUser> implements IUser {
   declare email?: string;
 
   @Column({
-    type: DataType.BIGINT,
+    type: DataType.INTEGER,
     allowNull: true,
   })
   declare dob?: number;
