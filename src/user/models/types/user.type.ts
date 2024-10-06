@@ -15,6 +15,10 @@ export const userSchema = z.object({
     .string()
     .min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự.' })
     .max(255, { message: 'Mật khẩu tối đa 255 ký tự.' }),
+  description: z
+    .string()
+    .max(1000, { message: 'Mô tả tối đa 1000 ký tự.' })
+    .optional(),
   email: z
     .string()
     .email({ message: 'Email chưa đúng định dạng.' })
@@ -37,6 +41,7 @@ export const userSchema = z.object({
 
 export const userUpdateSchema = z.object({
   name: userSchema.shape.name.optional(),
+  description: userSchema.shape.description.optional(),
   password: userSchema.shape.password.optional(),
   email: userSchema.shape.email.optional(),
   avatarUrl: userSchema.shape.avatarUrl.optional(),

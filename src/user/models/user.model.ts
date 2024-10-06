@@ -28,10 +28,7 @@ export class UserModel extends Model<IUser> implements IUser {
     type: DataType.STRING,
     allowNull: false,
     validate: {
-      len: [
-        userSchema.shape.password.minLength!,
-        userSchema.shape.password.maxLength!,
-      ],
+      len: [userSchema.shape.name.minLength!, userSchema.shape.name.maxLength!],
     },
   })
   declare name: string;
@@ -60,6 +57,15 @@ export class UserModel extends Model<IUser> implements IUser {
     },
   })
   declare password: string;
+
+  @Column({
+    type: DataType.STRING(1000),
+    allowNull: true,
+    validate: {
+      len: [0, 1000],
+    },
+  })
+  declare description: string;
 
   @Column({
     type: DataType.STRING,

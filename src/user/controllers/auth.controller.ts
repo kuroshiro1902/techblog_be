@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { IUserDto, User } from '../models/user.model';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
+import { IUser } from '../models/types/user.type';
 
 const _LoginSchema = z.object({
   username: User.schema.shape.username,
@@ -59,7 +60,8 @@ const AuthController = {
           .json({ isSuccess: false, message: error.message });
       }
 
-      const { name, username, password, email, dob, avatarUrl } = data;
+      const { name, username, password, email, dob, avatarUrl, description } =
+        data;
 
       const existedUser = await UserService.findOneBy({ username });
       if (existedUser) {
@@ -70,9 +72,10 @@ const AuthController = {
 
       const hashedPassword = AuthService.hashPassword(password);
 
-      const user = {
+      const user: Omit<IUser, 'id'> = {
         name,
         username,
+        description,
         password: hashedPassword,
         email,
         dob,
