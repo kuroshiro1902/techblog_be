@@ -56,7 +56,7 @@ export const USER_PUBLIC_ATTRIBUTE: TUserAttribute[] = [
   'email',
   'description',
   'dob',
-  'roles',
+  // 'roles',
   'createdAt',
   'updatedAt',
 ];

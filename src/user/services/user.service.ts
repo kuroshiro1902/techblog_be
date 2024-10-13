@@ -10,7 +10,6 @@ export const UserService = {
   async findAll(query?: TFindUserQuery, pagination?: TPagination) {
     const users = await DB.user.findMany({
       ...findUserQuery(query, pagination),
-      include: { roles: { select: { id: true, name: true } } },
     });
     return users;
   },
@@ -18,7 +17,6 @@ export const UserService = {
   async findOne(query?: TFindUserQuery) {
     const users = await DB.user.findMany({
       ...findUserQuery(query, { pageSize: 1 }),
-      include: { roles: { select: { id: true, name: true } } },
     });
     return users.pop() ?? null;
   },
