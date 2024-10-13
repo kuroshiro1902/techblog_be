@@ -3,11 +3,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import router from './router';
-import { initModels } from './models';
 
 const main = async () => {
-  await initModels();
-
   const app = express();
   app.use(bodyParser.json({ limit: '1mb' }));
   app.use(express.json());

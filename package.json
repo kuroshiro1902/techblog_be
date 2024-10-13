@@ -1,5 +1,5 @@
 {
-  "name": "expressjs_boilerplate",
+  "name": "techsolve_server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/server": "^4.11.0",
+    "@prisma/client": "^5.20.0",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -20,6 +21,7 @@
     "graphql": "^16.9.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
+    "prisma": "^5.20.0",
     "sequelize": "^6.37.3",
     "sequelize-typescript": "^2.1.6",
     "zod": "^3.23.8"

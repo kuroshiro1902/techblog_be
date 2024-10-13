@@ -1,4 +1,4 @@
-import { createUserRoleAssociation } from './associations/user-role.association';
+import { createUserRoleAssociation } from './associations/post-category.association';
 import { Role } from './role.model';
 import { User } from './user.model';
 import { DB } from '@/database/database';
