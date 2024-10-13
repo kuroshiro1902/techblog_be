@@ -1,17 +1,14 @@
-import { Role } from '../role.model';
-import { User } from '../user.model';
-
-export const userRoleAssociation = {
+export const postCategoryAssociation = {
   tableName: 'user_role',
   userForeignKey: 'user_id',
   roleForeignKey: 'role_id',
-  roleAssociationAlias: 'roles',
-  usersAssociationAlias: 'user',
+  roleAssociationKey: 'roles',
+  usersAssociationKey: 'user',
 };
 
 // USER-ROLE ASSOCIATION - M:N
-export const createUserRoleAssociation = () => {
-  User.model.belongsToMany(Role.model, {
+export const createPostCategoryAssociation = () => {
+  Post.model.belongsToMany(Role.model, {
     through: userRoleAssociation.tableName,
     foreignKey: userRoleAssociation.userForeignKey,
     otherKey: userRoleAssociation.roleForeignKey,

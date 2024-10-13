@@ -2,7 +2,7 @@ import { Request, Response } from '@/types';
 import jwt from 'jsonwebtoken';
 import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { ENVIRONMENT } from '@/common/environments/environment';
-import User from '../models/user';
+import User from '@/user/models/user';
 
 export function authMiddleware(req: Request, res: Response, next: any) {
   const token = req.header('Authorization');

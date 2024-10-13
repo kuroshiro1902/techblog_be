@@ -1,6 +1,11 @@
-export const ROLES = {
-  user: 1,
-  admin: 2,
-};
+import { TRole } from '../models/role/role.type';
 
-export const DEFAULT_ROLE_ID = ROLES.user;
+export enum ERoleName {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+
+export const ROLES = {
+  [ERoleName.USER]: { id: 1, name: ERoleName.USER } as TRole,
+  [ERoleName.ADMIN]: { id: 2, name: ERoleName.ADMIN } as TRole,
+};

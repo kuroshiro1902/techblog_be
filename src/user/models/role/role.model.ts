@@ -1,9 +1,11 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
-import { IRole, roleSchema, roleUpdateSchema } from './types/role.type';
-import { IUser } from './types/user.type';
+import { TRole, TRoleCreate, roleSchema } from './role.type';
+import { TUser } from '../user/user.type';
+import { EUserRoleAssociation } from '@/user/constants/associations/user-role.constant';
 
 const tableName = 'roles';
 const modelName = 'role';
+const usersAssociationKey = EUserRoleAssociation.usersAssociationKey;
 
 @Table({
   tableName,
@@ -11,7 +13,7 @@ const modelName = 'role';
   timestamps: true,
   underscored: true,
 })
-class RoleModel extends Model implements IRole {
+export class RoleModel extends Model<TRole, TRoleCreate> implements TRole {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
@@ -28,23 +30,5 @@ class RoleModel extends Model implements IRole {
   })
   declare name: string;
 
-  declare users?: IUser[];
+  declare [usersAssociationKey]?: TUser[];
 }
-
-const roleDto = (role: IRole) => {
-  const { id, name } = role;
-  return { id, name };
-};
-
-export const Role = {
-  get schema() {
-    return roleSchema;
-  },
-  get updateSchema() {
-    return roleUpdateSchema;
-  },
-  get model() {
-    return RoleModel;
-  },
-  dto: roleDto,
-};

@@ -3,58 +3,65 @@ import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { serverError } from './serverError';
 import { Request, Response } from '@/types';
 import { z } from 'zod';
+import { TUserDto, User } from '../models/user.model';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
-import { TUser } from '../models/user/user.type';
-import User from '../models/user';
+import { TUser } from '../models/types/user.type';
 
-const _LoginSchema = User.userSchema.pick({ username: true, password: true });
+const _LoginSchema = z.object({
+  username: User.schema.shape.username,
+  password: User.schema.shape.password,
+});
 
 const AuthController = {
   async login(
     req: Request<z.infer<typeof _LoginSchema>>,
-    res: Response
-    // <{ token: string; user: User.TUser }>
+    res: Response<{ token: string; user: TUserDto }>
   ) {
-    // try {
-    //   const { data, error } = _LoginSchema.safeParse(req.body);
-    //   if (error) {
-    //     return res
-    //       .status(STATUS_CODE.INVALID_INPUT)
-    //       .json({ isSuccess: false, message: error.message });
-    //   }
-    //   const { username, password } = data;
-    //   const user = await UserService.findOneBy({ username });
-    //   if (!user) {
-    //     return res
-    //       .status(STATUS_CODE.UNAUTHORIZED)
-    //       .json({ isSuccess: false, message: 'Người dùng không tồn tại!' });
-    //   }
-    //   if (!AuthService.comparePassword(password, user.password)) {
-    //     return res
-    //       .status(STATUS_CODE.UNAUTHORIZED)
-    //       .json({ isSuccess: false, message: 'Sai mật khẩu!' });
-    //   }
-    //   const token = AuthService.generateAccessToken({ id: user.id });
-    //   return res.json({
-    //     isSuccess: true,
-    //     data: { token, user: User.dto(user) },
-    //   });
-    // } catch (error) {
-    //   return serverError(res, error);
-    // }
-  },
-
-  async signup(req: Request, res: Response) {
     try {
-      const { data, error } = User.userCreateSchema.safeParse(req.body);
+      const { data, error } = _LoginSchema.safeParse(req.body);
       if (error) {
         return res
           .status(STATUS_CODE.INVALID_INPUT)
           .json({ isSuccess: false, message: error.message });
       }
 
-      const { name, username, password, email, dob, avatarUrl, description } = data;
+      const { username, password } = data;
+      const user = await UserService.findOneBy({ username });
+      if (!user) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Người dùng không tồn tại!' });
+      }
+      if (!AuthService.comparePassword(password, user.password)) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Sai mật khẩu!' });
+      }
+
+      const token = AuthService.generateAccessToken({ id: user.id });
+      return res.json({
+        isSuccess: true,
+        data: { token, user: User.dto(user) },
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async signup(req: Request, res: Response) {
+    try {
+      const { data, error } = User.schema
+        .omit({ id: true, roles: true })
+        .safeParse(req.body);
+      if (error) {
+        return res
+          .status(STATUS_CODE.INVALID_INPUT)
+          .json({ isSuccess: false, message: error.message });
+      }
+
+      const { name, username, password, email, dob, avatarUrl, description } =
+        data;
 
       const existedUser = await UserService.findOneBy({ username });
       if (existedUser) {

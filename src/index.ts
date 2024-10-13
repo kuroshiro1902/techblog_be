@@ -3,7 +3,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import router from './router';
-import { initModels } from './models';
+import { initModels } from './modelResolvers';
 
 const main = async () => {
   await initModels();

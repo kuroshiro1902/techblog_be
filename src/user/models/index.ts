@@ -1,12 +1,11 @@
-import { createUserRoleAssociation } from './associations/user-role.association';
-import { Role } from './role.model';
-import { User } from './user.model';
+import { userRoleAssociation } from './associationResolvers/user-role.association';
+import { RoleModel } from './role';
+import User from './user';
 import { DB } from '@/database/database';
 
-export const initUserModels = async () => {
-  DB.addModels([User.model, Role.model]);
-
-  createUserRoleAssociation();
+export const modelInitiateResolver = async () => {
+  DB.addModels([User.UserModel, RoleModel]);
+  userRoleAssociation();
 
   await DB.sync({ logging: false, alter: true });
 };

@@ -1,94 +1,82 @@
 import { DB } from '@/database/database';
-import { FindOptions } from 'sequelize';
-import { z } from 'zod';
-import { Role } from '../models/role.model';
-import { IUser } from '../models/types/user.type';
-import { User, UserModel } from '../models/user.model';
-import { DEFAULT_ROLE_ID } from '../constants/role.constant';
 
-const defaultPageSize = 50;
-const rolesRelationKey: keyof UserModel = 'roles';
-
-const userFindOptions: FindOptions = {
-  include: [
-    {
-      model: Role.model,
-      as: rolesRelationKey,
-      through: { attributes: [] }, // Không lấy ra bảng trung gian
-    },
-  ],
-};
-
-const parseUserFilter = (
-  filter: Partial<IUser>,
-  omitKeys: (keyof IUser)[] = []
-) => {
-  // Loại bỏ các thuộc tính chỉ định trong omitKeys
-  const schemaToParse = User.schema.omit(
-    omitKeys.reduce((acc, key) => {
-      acc[key] = true;
-      return acc;
-    }, {} as Record<keyof IUser, true>)
-  );
-
-  return schemaToParse.partial().parse(filter);
-};
-
-// Helper function to map user to plain object
-const mapToPlainUser = (user: UserModel): IUser => user.get({ plain: true });
+import { ERoleName, ROLES } from '../constants/role.constant';
+import User from '../models/user';
+import { paginationOptions, TPagination } from '@/common/models/pagination/pagination.type';
+import UserServiceHelper from './helpers';
+import { searchUserQuery, TSearchUserQuery } from './query/searchUser.query';
+import { EUserRoleAssociation } from '../constants/associations/user-role.constant';
+import { Role } from '../models/role';
 
 // Refactored UserService
 export const UserService = {
   async findAllBy(
-    filter: Partial<IUser>,
-    limit: number = defaultPageSize
-  ): Promise<IUser[]> {
-    const parsedFilter = parseUserFilter(filter);
-    const users = await User.model.findAll({
-      where: parsedFilter,
-      limit,
-      ...userFindOptions,
+    query?: TSearchUserQuery,
+    pagination?: Partial<TPagination>,
+    options?: UserServiceHelper.IFindUserOptions
+  ): Promise<User.TUser[]> {
+    const users = await User.UserModel.findAll({
+      where: searchUserQuery(query),
+      ...paginationOptions(pagination ?? {}),
+      ...UserServiceHelper.findUserOptions(options),
     });
 
-    return users.map(mapToPlainUser);
+    return users.map(UserServiceHelper.mapToPlainUser);
   },
 
-  async findOneBy(filter: Partial<IUser>): Promise<IUser | null> {
-    const parsedFilter = parseUserFilter(filter);
-    const user = await User.model.findOne({
-      where: parsedFilter,
-      ...userFindOptions,
+  async findOneBy(
+    filter: { id: number },
+    options?: UserServiceHelper.IFindUserOptions
+  ): Promise<User.TUser | null> {
+    const userId = User.userSchema.shape.id.parse(filter.id);
+    const user = await User.UserModel.findOne({
+      where: { id: userId },
+      limit: 1,
+      ...options,
     });
 
-    return user ? mapToPlainUser(user) : null;
+    return user ? UserServiceHelper.mapToPlainUser(user) : null;
   },
 
-  async createUser(filter: Omit<IUser, 'id'>): Promise<IUser> {
-    const userInput = parseUserFilter(filter, ['id']);
+  async createUser(input: User.TUserCreate): Promise<User.TUser> {
+    const userInput = User.userCreateSchema.parse(input);
 
     const createdUser = await DB.transaction(async (transaction) => {
-      const user = await User.model.create(userInput as IUser, { transaction });
-      await user.$set(rolesRelationKey, [DEFAULT_ROLE_ID], { transaction });
+      const user = await User.UserModel.create(userInput, { transaction });
+      await user.$set(EUserRoleAssociation.roleAssociationKey, [ROLES[ERoleName.USER].id], {
+        transaction,
+      });
       return user;
     });
-
-    const reloadedUser = await createdUser.reload(userFindOptions);
-    return mapToPlainUser(reloadedUser);
+    createdUser.set(
+      {
+        [EUserRoleAssociation.roleAssociationKey]: [
+          { name: ROLES[ERoleName.USER].name } as Role.TRole,
+        ],
+      },
+      { raw: true }
+    );
+    return UserServiceHelper.mapToPlainUser(createdUser);
   },
 
-  async updateUser(
-    userId: number,
-    patchValue: z.infer<typeof User.updateSchema>
-  ): Promise<IUser> {
-    const parsedUserId = User.schema.shape.id.parse(userId);
-    const parsedPatchValue = User.updateSchema.parse(patchValue);
+  // async updateUser(
+  //   userId: number,
+  //   patchValue: Omit<User.TUser, 'id' | 'username'>
+  // ): Promise<User.TUser> {
+  //   const parsedUserId = User.userSchema.shape.id.parse(userId);
+  //   const parsedPatchValue = User.userSchema
+  //     .omit({ id: true, username: true })
+  //     .parse(patchValue);
 
-    const user = await User.model.findByPk(parsedUserId);
-    if (!user) {
-      throw new Error(`Không tìm thấy user với id ${parsedUserId}`);
-    }
+  //   const user = await User.UserModel.findByPk(parsedUserId);
+  //   if (!user) {
+  //     throw new Error(`Không tìm thấy user với id ${parsedUserId}`);
+  //   }
 
-    const updatedUser = await user.update(parsedPatchValue);
-    return mapToPlainUser(updatedUser);
-  },
+  //   const updatedUser = await DB.transaction(async (transaction) => {
+  //     const updatedUser = await user.update(parsedPatchValue, { transaction });
+  //     await updatedUser.$set(EUserRoleAssociation.roleAssociationKey, parsedPatchValue);
+  //   });
+  //   return UserServiceHelper.mapToPlainUser(updatedUser);
+  // },
 };
