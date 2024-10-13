@@ -1,5 +1,4 @@
-import { TRole } from '../models/role/role.type';
-
+import { TRole } from '../validators/role.schema';
 export enum ERoleName {
   ADMIN = 'admin',
   USER = 'user',

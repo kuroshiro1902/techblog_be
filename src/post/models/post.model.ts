@@ -1,6 +1,6 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 import { IPost, postSchema, postUpdateSchema } from './types/post.type';
-import { TUser } from '@/user/models/user/user.type';
+import { TUser } from '@/user/models/user.type';
 import { ICategory } from './types/category.type';
 
 const tableName = 'posts';
@@ -46,16 +46,7 @@ export class PostModel extends Model<IPost> implements IPost {
 export interface IPostDto extends IPost {}
 
 const postDto = (post: IPost): IPostDto => {
-  const {
-    id,
-    name,
-    author,
-    content,
-    categories,
-    thumbnailUrl,
-    created_at,
-    updated_at,
-  } = post;
+  const { id, name, author, content, categories, thumbnailUrl, created_at, updated_at } = post;
   return {
     id,
     name,

@@ -1,5 +1,5 @@
-import { ENVIRONMENT } from '@/common/environments/environment';
-import { Sequelize } from 'sequelize-typescript';
+import { PrismaClient } from '@prisma/client';
 
-const { uri } = ENVIRONMENT.db;
-export const DB = new Sequelize(uri, {});
+const DB = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] });
+
+export { DB };

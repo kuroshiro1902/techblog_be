@@ -1,0 +1,2 @@
+npx prisma migrate dev --name <migration_name>
+dùng middleware để xác thực input, có thể dùng lại middleware cho nhiều api

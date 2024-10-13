@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { baseCategorySchema, categorySchema } from './category.type';
-import { userSchema } from '@/user/models/user/user.type';
+import { userSchema } from '@/user/models/user.type';
 
 export const postSchema = z.object({
   id: z.number().positive(),
@@ -9,10 +9,7 @@ export const postSchema = z.object({
     .min(1, { message: 'Tên phải có ít nhất 1 ký tự.' })
     .max(255, { message: 'Tên tối đa 255 ký tự.' }),
   thumbnailUrl: z.string().max(255).optional(),
-  content: z
-    .string()
-    .max(7500, { message: 'Nội dung bài viết tối đa 7500 ký tự.' })
-    .trim(),
+  content: z.string().max(7500, { message: 'Nội dung bài viết tối đa 7500 ký tự.' }).trim(),
   author: userSchema.pick({
     id: true,
     name: true,

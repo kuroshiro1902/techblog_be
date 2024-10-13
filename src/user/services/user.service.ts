@@ -1,63 +1,48 @@
 import { DB } from '@/database/database';
 
 import { ERoleName, ROLES } from '../constants/role.constant';
-import User from '../models/user';
-import { paginationOptions, TPagination } from '@/common/models/pagination/pagination.type';
-import UserServiceHelper from './helpers';
-import { searchUserQuery, TSearchUserQuery } from './query/searchUser.query';
-import { EUserRoleAssociation } from '../constants/associations/user-role.constant';
-import { Role } from '../models/role';
+import { paginationOptions, TPagination } from '@/common/models/pagination/pagination.model';
+import { findUserQuery, TFindUserQuery } from './query/findUser.query';
+import { TUser } from '../validators/user.schema';
 
 // Refactored UserService
 export const UserService = {
-  async findAllBy(
-    query?: TSearchUserQuery,
-    pagination?: Partial<TPagination>,
-    options?: UserServiceHelper.IFindUserOptions
-  ): Promise<User.TUser[]> {
-    const users = await User.UserModel.findAll({
-      where: searchUserQuery(query),
-      ...paginationOptions(pagination ?? {}),
-      ...UserServiceHelper.findUserOptions(options),
+  async findAll(query?: TFindUserQuery, pagination?: TPagination) {
+    const users = await DB.user.findMany({
+      ...findUserQuery(query, pagination),
+      include: { roles: { select: { id: true, name: true } } },
     });
-
-    return users.map(UserServiceHelper.mapToPlainUser);
+    return users;
   },
 
-  async findOneBy(
-    filter: { id: number },
-    options?: UserServiceHelper.IFindUserOptions
-  ): Promise<User.TUser | null> {
-    const userId = User.userSchema.shape.id.parse(filter.id);
-    const user = await User.UserModel.findOne({
-      where: { id: userId },
-      limit: 1,
-      ...options,
+  async findOne(query?: TFindUserQuery) {
+    const users = await DB.user.findMany({
+      ...findUserQuery(query, { pageSize: 1 }),
+      include: { roles: { select: { id: true, name: true } } },
     });
-
-    return user ? UserServiceHelper.mapToPlainUser(user) : null;
+    return users.pop() ?? null;
   },
 
-  async createUser(input: User.TUserCreate): Promise<User.TUser> {
-    const userInput = User.userCreateSchema.parse(input);
+  // async createUser(input: User.TUserCreate): Promise<User.TUser> {
+  //   const userInput = User.userCreateSchema.parse(input);
 
-    const createdUser = await DB.transaction(async (transaction) => {
-      const user = await User.UserModel.create(userInput, { transaction });
-      await user.$set(EUserRoleAssociation.roleAssociationKey, [ROLES[ERoleName.USER].id], {
-        transaction,
-      });
-      return user;
-    });
-    createdUser.set(
-      {
-        [EUserRoleAssociation.roleAssociationKey]: [
-          { name: ROLES[ERoleName.USER].name } as Role.TRole,
-        ],
-      },
-      { raw: true }
-    );
-    return UserServiceHelper.mapToPlainUser(createdUser);
-  },
+  //   const createdUser = await DB.transaction(async (transaction) => {
+  //     const user = await User.UserModel.create(userInput, { transaction });
+  //     await user.$set(EUserRoleAssociation.roleAssociationKey, [ROLES[ERoleName.USER].id], {
+  //       transaction,
+  //     });
+  //     return user;
+  //   });
+  //   createdUser.set(
+  //     {
+  //       [EUserRoleAssociation.roleAssociationKey]: [
+  //         { name: ROLES[ERoleName.USER].name } as Role.TRole,
+  //       ],
+  //     },
+  //     { raw: true }
+  //   );
+  //   return UserServiceHelper.mapToPlainUser(createdUser);
+  // },
 
   // async updateUser(
   //   userId: number,

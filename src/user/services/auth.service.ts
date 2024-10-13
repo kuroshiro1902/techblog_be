@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { ENVIRONMENT } from '@/common/environments/environment';
-import User from '../models/user';
+import { TTokenPayload } from '../validators/user.schema';
 
 const accessTokenExpiresIn = '3d';
 // const accessTokenExpiresIn = '30m';
@@ -14,12 +14,12 @@ export const AuthService = {
   comparePassword(plainPassword: string, encryptedPassword: string) {
     return bcrypt.compareSync(plainPassword, encryptedPassword);
   },
-  generateAccessToken(payload: User.TTokenPayload) {
+  generateAccessToken(payload: TTokenPayload) {
     return jwt.sign(payload, ENVIRONMENT.secretKey, {
       expiresIn: accessTokenExpiresIn,
     });
   },
-  generateRefreshToken(payload: User.TTokenPayload) {
+  generateRefreshToken(payload: TTokenPayload) {
     return jwt.sign(payload, ENVIRONMENT.refreshSecretKey, {});
   },
 };
