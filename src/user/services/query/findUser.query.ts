@@ -3,12 +3,7 @@ import {
   paginationSchema,
   TPagination,
 } from '@/common/models/pagination/pagination.model';
-import {
-  TUser,
-  TUserAttribute,
-  userAttributeSchema,
-  userSchema,
-} from '@/user/validators/user.schema';
+import { userAttributeSchema, userSchema } from '@/user/validators/user.schema';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 

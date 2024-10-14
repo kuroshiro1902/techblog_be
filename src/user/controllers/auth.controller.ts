@@ -5,7 +5,7 @@ import { Request, Response } from '@/types';
 import { z } from 'zod';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
-import { TUser, USER_PUBLIC_ATTRIBUTE, userSchema } from '../validators/user.schema';
+import { USER_PUBLIC_ATTRIBUTE, userSchema } from '../validators/user.schema';
 
 const _LoginSchema = userSchema.pick({ username: true, password: true });
 

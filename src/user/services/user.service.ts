@@ -1,9 +1,7 @@
 import { DB } from '@/database/database';
 
-import { ERoleName, ROLES } from '../constants/role.constant';
-import { paginationOptions, TPagination } from '@/common/models/pagination/pagination.model';
+import { TPagination } from '@/common/models/pagination/pagination.model';
 import { findUserQuery, TFindUserQuery } from './query/findUser.query';
-import { TUser } from '../validators/user.schema';
 
 // Refactored UserService
 export const UserService = {
