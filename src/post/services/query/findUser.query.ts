@@ -3,8 +3,7 @@ import {
   paginationSchema,
   TPagination,
 } from '@/common/models/pagination/pagination.model';
-import { ERoleName, ROLES } from '@/user/constants/role.constant';
-import { EUserField, userFieldSchema, userSchema } from '@/user/validators/user.schema';
+import { userFieldSchema, userSchema } from '@/user/validators/user.schema';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
@@ -13,7 +12,7 @@ const findUserQueryTypeSchema = z.enum(['AND', 'OR', 'and', 'or']).default('and'
 const findUserQuerySchema = z.object({
   type: findUserQueryTypeSchema,
   fields: z.array(userFieldSchema).optional(),
-  input: userSchema.omit({ [EUserField.password]: true }).partial(),
+  input: userSchema.omit({ roles: true, password: true }).partial(),
 });
 
 type TFindUserQuery = Partial<z.infer<typeof findUserQuerySchema>>;
@@ -32,23 +31,11 @@ const findUserQuery = (
 
   // Building the where query by filtering out undefined or empty values
   const whereQuery: Prisma.UserWhereInput = {
-    [EUserField.id]: query?.input?.id || undefined,
-    [EUserField.username]: query?.input?.username
-      ? { contains: query?.input.username, mode }
-      : undefined,
-    [EUserField.name]: query?.input?.name ? { contains: query?.input.name, mode } : undefined,
-    [EUserField.email]: query?.input?.email
-      ? { contains: query?.input.email, mode }
-      : undefined,
-    [EUserField.dob]: query?.input?.dob || undefined,
-    [EUserField.roles]: {
-      some: {
-        AND:
-          query?.input?.roles?.map((role) => {
-            return { name: role?.name };
-          }) || undefined,
-      },
-    },
+    id: query?.input?.id || undefined,
+    name: query?.input?.name ? { contains: query?.input.name, mode } : undefined,
+    email: query?.input?.email ? { contains: query?.input.email, mode } : undefined,
+    username: query?.input?.username ? { contains: query?.input.username, mode } : undefined,
+    dob: query?.input?.dob || undefined,
   };
 
   // Remove undefined or null values from the whereQuery
@@ -70,12 +57,13 @@ const findUserQuery = (
     ? query.fields.reduce((acc, field) => {
         acc[field] = true;
         return acc;
-      }, {} as Record<EUserField, boolean>)
-    : ({} as Record<EUserField, boolean>);
+      }, {} as Record<string, boolean>)
+    : undefined;
+
   return {
     where,
     ...paging,
-    select: { ...select, roles: { select: { name: select[EUserField.roles] ? true : false } } },
+    select: { ...select },
   };
 };
 

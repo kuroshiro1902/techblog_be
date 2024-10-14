@@ -2,43 +2,33 @@ import { DB } from '@/database/database';
 
 import { TPagination } from '@/common/models/pagination/pagination.model';
 import { findUserQuery, TFindUserQuery } from './query/findUser.query';
+import {
+  EUserField,
+  TUserCreateInput,
+  USER_PUBLIC_FIELDS,
+  userCreateSchema,
+} from '../validators/user.schema';
+import { findMany, TUserFindManyQuery } from './queries/findMany.query';
+import { ERoleName, ROLES } from '../constants/role.constant';
 
-// Refactored UserService
 export const UserService = {
-  async findAll(query?: TFindUserQuery, pagination?: TPagination) {
-    const users = await DB.user.findMany({
-      ...findUserQuery(query, pagination),
-    });
-    return users;
+  findMany,
+
+  async findOne(query: TUserFindManyQuery) {
+    const users = await this.findMany({ ...query, pageSize: 1 });
+    return users.pop();
   },
 
-  async findOne(query?: TFindUserQuery) {
-    const users = await DB.user.findMany({
-      ...findUserQuery(query, { pageSize: 1 }),
+  async createUser(input: TUserCreateInput) {
+    const userInput = userCreateSchema.parse(input);
+    const createdUser = await DB.user.create({
+      data: { ...userInput, [EUserField.roles]: { connect: { id: ROLES[ERoleName.USER].id } } },
+      select: USER_PUBLIC_FIELDS.reduce((prev, curr) => {
+        return { ...prev, [curr]: true };
+      }, {} as Record<EUserField, boolean>),
     });
-    return users.pop() ?? null;
+    return createdUser;
   },
-
-  // async createUser(input: User.TUserCreate): Promise<User.TUser> {
-  //   const userInput = User.userCreateSchema.parse(input);
-
-  //   const createdUser = await DB.transaction(async (transaction) => {
-  //     const user = await User.UserModel.create(userInput, { transaction });
-  //     await user.$set(EUserRoleAssociation.roleAssociationKey, [ROLES[ERoleName.USER].id], {
-  //       transaction,
-  //     });
-  //     return user;
-  //   });
-  //   createdUser.set(
-  //     {
-  //       [EUserRoleAssociation.roleAssociationKey]: [
-  //         { name: ROLES[ERoleName.USER].name } as Role.TRole,
-  //       ],
-  //     },
-  //     { raw: true }
-  //   );
-  //   return UserServiceHelper.mapToPlainUser(createdUser);
-  // },
 
   // async updateUser(
   //   userId: number,

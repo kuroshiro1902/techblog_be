@@ -10,7 +10,7 @@ export const DB = new Pool({
 
 async function run() {
   try {
-    if (!ENVIRONMENT.db.uri) throw new Error('Invalid database URI!');
+    if (!.uri) throw new Error('Invalid database URI!');
     await DB.connect();
     console.log('Successfully connected to database!');
   } catch (err: any) {

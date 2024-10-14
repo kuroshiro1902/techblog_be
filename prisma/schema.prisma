@@ -14,22 +14,35 @@ datasource db {
 
 model User {
   id          Int      @id @default(autoincrement())
-  name        String
+  name        String   @db.VarChar(255)
   username    String   @unique
-  password    String
+  password    String   @db.Text
   description String?  @db.Text
   email       String?  @unique
   dob         Int?
-  avatarUrl   String?  @db.VarChar(500) 
+  avatarUrl   String?  @db.VarChar(500)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   roles       Role[]
+  posts       Post[]
 }
 
 model Role {
-  id    Int    @id @default(autoincrement())
-  name  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  users User[]
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(255)
+  slug      String   @db.VarChar(255)
+  content   String   @db.Text
+  published Boolean? @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
 }

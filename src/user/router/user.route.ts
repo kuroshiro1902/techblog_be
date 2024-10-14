@@ -6,5 +6,6 @@ import { UserController } from '../controllers/user.controller';
  */
 const userRouter = Router();
 userRouter.get('/:userId', UserController.getUserById);
+userRouter.post('/search', UserController.searchUsers);
 
 export default userRouter;
