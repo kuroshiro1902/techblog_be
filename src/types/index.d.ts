@@ -7,6 +7,7 @@ export type Request<
   ReqQuery = qs.ParsedQs
 > = ERequest<Params, any, Partial<ReqBody>, ReqQuery> & {
   user?: User.TTokenPayload;
+  data?: { [key: string]: any };
 };
 export interface ResponseBody<T = any> {
   isSuccess?: boolean;

@@ -1,7 +1,4 @@
 import { DB } from '@/database/database';
-
-import { TPagination } from '@/common/models/pagination/pagination.model';
-import { findUserQuery, TFindUserQuery } from './query/findUser.query';
 import {
   EUserField,
   TUserCreateInput,

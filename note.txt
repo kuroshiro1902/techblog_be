@@ -1,3 +1,6 @@
 npx prisma migrate dev --name <migration_name>
 npx prisma db seed
 dùng middleware để xác thực input, có thể dùng lại middleware cho nhiều api
+
+- lấy ra cả author cho các bài viết
+- truyền tham số orderBy vào controller

@@ -62,7 +62,7 @@ export const userSchema = z.object({
   [EUserField.roles]: z.array(roleSchema).default([ROLES[ERoleName.USER]]),
   ...timestampSchema(),
 }) satisfies z.Schema<Prisma.UserUncheckedCreateWithoutRolesInput>;
-export type TUser = z.infer<typeof userSchema>;
+// export type TUser = z.infer<typeof userSchema>;
 
 export type TTokenPayload = { [EUserField.id]: number };
 

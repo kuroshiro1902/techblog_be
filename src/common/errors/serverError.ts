@@ -4,9 +4,9 @@ import { Response } from 'express';
 export const serverError = (res: Response, message?: string | any) => {
   const _message: string = (() => {
     if (message) {
-      return typeof message === 'string'
-        ? message.trim()
-        : message?.message || message?.issues?.[0]?.message;
+      return typeof message === 'object'
+        ? message?.issues?.[0]?.message || message?.message
+        : message.trim();
     }
     return 'Internal Server Error! Try again later.';
   })();

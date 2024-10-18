@@ -16,10 +16,18 @@ export const paginationSchema = z
   .partial();
 export type TPagination = Partial<z.infer<typeof paginationSchema>>;
 export const paginationOptions = (pagination?: TPagination) => {
-  const { pageIndex = defaultPageIndex - 1, pageSize = defaultPageSize } =
-    paginationSchema.parse(pagination ?? {});
+  const { pageIndex = defaultPageIndex - 1, pageSize = defaultPageSize } = pagination ?? {};
   return {
     skip: pageIndex * pageSize,
     take: pageSize,
+    pageIndex: pageIndex + 1,
+    pageSize,
   };
+};
+
+export type TPageInfo = {
+  pageIndex: number;
+  pageSize: number;
+  totalPage: number;
+  hasNextPage: boolean;
 };

@@ -30,8 +30,8 @@ const findManyQuerySchema = z.object({
   input: z
     .object({
       [EUserField.id]: userSchema.shape[EUserField.id].min(0).optional(),
-      [EUserField.name]: userSchema.shape[EUserField.name].min(0).optional(),
-      [EUserField.username]: userSchema.shape[EUserField.username].min(0).optional(),
+      [EUserField.name]: userSchema.shape[EUserField.name].min(0).trim().optional(),
+      [EUserField.username]: userSchema.shape[EUserField.username].min(0).trim().optional(),
       [EUserField.email]: userSchema.shape[EUserField.email].optional(),
       [EUserField.dob]: z
         .union([
@@ -58,10 +58,9 @@ export type TUserFindManyQuery = z.input<typeof findManyQuerySchema>;
 export const findMany = async (query: TUserFindManyQuery) => {
   const parsedQuery = findManyQuerySchema.parse(query);
   const { input, pageIndex, pageSize, select } = parsedQuery;
-  console.log({ query, parsedQuery });
-
+  const mode = 'insensitive';
   // PAGINATION
-  const pagination = paginationOptions({ pageIndex, pageSize });
+  const { skip, take } = paginationOptions({ pageIndex, pageSize });
 
   // WHERE
   const where: Partial<Record<EUserField, any>> = {};
@@ -70,13 +69,13 @@ export const findMany = async (query: TUserFindManyQuery) => {
       where.id = input[EUserField.id];
     }
     if (input[EUserField.name]) {
-      where.name = { contains: input[EUserField.name], mode: 'insensitive' };
+      where.name = { contains: input[EUserField.name], mode };
     }
     if (input[EUserField.username]) {
-      where.username = { contains: input[EUserField.username], mode: 'insensitive' };
+      where.username = { contains: input[EUserField.username], mode };
     }
     if (input[EUserField.email]) {
-      where.email = { contains: input[EUserField.email], mode: 'insensitive' };
+      where.email = { contains: input[EUserField.email], mode };
     }
     if (input[EUserField.dob]) {
       if (typeof input[EUserField.dob] === 'object') {
@@ -129,16 +128,12 @@ export const findMany = async (query: TUserFindManyQuery) => {
       }
     }
   }
-  console.log({
-    where,
-    select: selectFields,
-    ...pagination,
-  });
 
   const users = await DB.user.findMany({
     where,
     select: { ...selectFields, name: true },
-    ...pagination,
+    skip,
+    take,
   });
   return users;
 };

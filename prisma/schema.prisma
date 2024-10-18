@@ -36,13 +36,14 @@ model Role {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  slug      String   @db.VarChar(255)
-  content   String   @db.Text
-  published Boolean? @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
+  id           Int      @id @default(autoincrement())
+  title        String   @db.VarChar(255)
+  slug         String   @db.VarChar(255)
+  content      String   @db.Text
+  thumbnailUrl String?  @db.VarChar(500)
+  isPublished  Boolean? @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  authorId     Int
+  author       User     @relation(fields: [authorId], references: [id])
 }
