@@ -1,4 +1,4 @@
-import User from '@/user/models/user';
+import { TTokenPayload } from '@/user/validators/user.schema';
 import { Request as ERequest, Response as EResponse } from 'express';
 
 export type Request<
@@ -6,7 +6,7 @@ export type Request<
   Params = { [key: string]: string },
   ReqQuery = qs.ParsedQs
 > = ERequest<Params, any, Partial<ReqBody>, ReqQuery> & {
-  user?: User.TTokenPayload;
+  user?: TTokenPayload;
   data?: { [key: string]: any };
 };
 export interface ResponseBody<T = any> {

@@ -2,6 +2,8 @@ import { Request, Response } from '@/types';
 import { serverError } from '../../common/errors/serverError';
 import { PostService } from '../services/post.service';
 import { EPostField } from '../validators/post.schema';
+import { EUserField } from '@/user/validators/user.schema';
+import { STATUS_CODE } from '@/common/constants/StatusCode';
 
 export const PostController = {
   async getPosts(req: Request, res: Response) {
@@ -71,6 +73,19 @@ export const PostController = {
   },
 
   async createPost(req: Request, res: Response) {
-    // Hàm sinh id ngẫu nhiên và gắn vào slug của post, cắt title để tổng độ dài của slug = title (đã mã hóa) + random_id <= 255
+    try {
+      const { data } = req.body;
+      const authorId = req.user?.[EUserField.id];
+      if (!authorId) {
+        res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Unauthorized.' });
+        return;
+      }
+      const createdPost = await PostService.create(data, authorId);
+      res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: createdPost });
+    } catch (error) {
+      return serverError(res, error);
+    }
   },
 };

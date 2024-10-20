@@ -2,7 +2,7 @@ import { Request, Response } from '@/types';
 import jwt from 'jsonwebtoken';
 import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { ENVIRONMENT } from '@/common/environments/environment';
-import User from '../models/user';
+import { TTokenPayload } from '../validators/user.schema';
 
 export function authMiddleware(req: Request, res: Response, next: any) {
   const token = req.header('Authorization');
@@ -14,7 +14,7 @@ export function authMiddleware(req: Request, res: Response, next: any) {
     const decoded = jwt.verify(
       token?.replace('Bearer', '')?.replace('bearer', '')?.trim(),
       ENVIRONMENT.secretKey
-    ) as User.TTokenPayload;
+    ) as TTokenPayload;
 
     req.user = decoded;
     next();

@@ -44,6 +44,13 @@ export const postSchema = z.object({
   ...timestampSchema(),
 });
 
+export const createPostSchema = postSchema.pick({
+  [EPostField.title]: true,
+  [EPostField.content]: true,
+  [EPostField.isPublished]: true,
+  [EPostField.thumbnailUrl]: true,
+});
+
 export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.id,
   EPostField.title,

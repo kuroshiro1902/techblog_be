@@ -12,4 +12,7 @@ export const ENVIRONMENT = Object.freeze({
   // }),
   clientUrl: env.CLIENT_URL!,
   passwordSalt: +env.PASSWORD_SALT!,
+  CLOUDINARY_NAME: env.CLOUDINARY_NAME!,
+  CLOUDINARY_API_KEY: env.CLOUDINARY_API_KEY!,
+  CLOUDINARY_API_SECRET: env.CLOUDINARY_API_SECRET!,
 });
