@@ -116,5 +116,11 @@ async function addCategoryToPost(postId: number, categoryId: number) {
   }
 }
 
-// Gọi hàm để thêm category vào bài viết
-addCategoryToPost(100, 3);
+async function setDefaultStatusPosts() {
+  const posts = await prisma.post.findMany({ select: { id: true } });
+  const a = await prisma.postLog.createMany({ data: posts.map((post) => ({ postId: post.id, status: "NOT_SYNCED" })) });
+  console.log(a.count);
+
+}
+
+// setDefaultStatusPosts();

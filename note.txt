@@ -2,6 +2,8 @@ npx prisma migrate dev --name <migration_name>
 npx prisma db seed
 dùng middleware để xác thực input, có thể dùng lại middleware cho nhiều api
 
-- truyền tham số orderBy vào controller
+- Kết nối elastic search, job đồng bộ bài viết
+  + Chỉ đồng bộ những thông tin cần dùng để search
+  vd nội dung, tên tác giả, ... (có thể đồng bộ dạng: {...post, author: {id: 1, name: 'Sơn'}})
+  Số tương tác thì có thể không cần đồng bộ, truy vấn trực tiếp trong postgres luôn.
 
-- Làm trang chi tiết bài viết

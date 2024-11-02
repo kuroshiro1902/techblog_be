@@ -23,7 +23,8 @@ export const createOne = async (post: z.input<typeof createPostSchema>, authorId
       title: validatedPost[EPostField.title].substring(0, 255 - slugLength - 1),
       slug,
       author: { connect: { id: validatedAuthorId } },
-      categories: { connect: validatedPost[EPostField.categories] }
+      categories: { connect: validatedPost[EPostField.categories] },
+      PostLog: { create: { status: "NOT_SYNCED" } }
     },
     select: POST_PUBLIC_FIELDS.reduce((prev, curr) => {
       return { ...prev, [curr]: true };
