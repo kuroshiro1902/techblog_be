@@ -4,6 +4,7 @@ import {
   TPageInfo,
 } from '@/common/models/pagination/pagination.model';
 import { DB } from '@/database/database';
+import { ECategoryField } from '@/category/validators/category.schema';
 import {
   EPostField,
   POST_PUBLIC_FIELDS,
@@ -68,6 +69,9 @@ export const findMany = async (query?: TFindPostQuery) => {
   if (select.author) {
     select.author = { select: { [EUserField.id]: true, [EUserField.name]: true } };
   }
+  if (select.categories) {
+    select.categories = { select: { [ECategoryField.id]: true, [ECategoryField.name]: true } }
+  }
 
   // ORDER BY
   const orderBy: Prisma.PostOrderByWithRelationInput = { [orderCond.field]: orderCond.order };
@@ -76,8 +80,6 @@ export const findMany = async (query?: TFindPostQuery) => {
   const totalCount = await DB.post.count({ where });
   const totalPage = Math.ceil(totalCount / pageSize);
   const hasNextPage = pageIndex < totalPage - 1;
-
-  console.log('aaaa', { fields, select });
 
   // Fetch posts
   const posts = await DB.post.findMany({ where, select, orderBy, take, skip });

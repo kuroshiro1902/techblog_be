@@ -61,8 +61,60 @@ async function seedPosts() {
   console.log('Seeded 100 posts successfully');
 }
 
-seedPosts()
-  .catch((e) => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
+// seedPosts()
+//   .catch((e) => console.error(e))
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
+
+async function seedCategories() {
+  // Tạo danh mục Frontend và Backend
+  const frontend = await prisma.category.create({
+    data: {
+      name: 'Frontend',
+    },
   });
+
+  const backend = await prisma.category.create({
+    data: {
+      name: 'Backend',
+    },
+  });
+
+  // Tạo danh mục Nodejs với Backend là danh mục cha
+  await prisma.category.create({
+    data: {
+      name: 'Nodejs',
+      parents: {
+        connect: { id: backend.id }, // Kết nối với Backend
+      },
+    },
+  });
+
+  console.log('Categories seeded successfully!');
+
+}
+
+async function addCategoryToPost(postId: number, categoryId: number) {
+  try {
+    // Cập nhật bài viết với category
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        categories: {
+          connect: { id: categoryId }, // Kết nối với category có ID 3
+        },
+      },
+    });
+
+    console.log('Post updated successfully:', updatedPost);
+  } catch (error) {
+    console.error('Error updating post:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Gọi hàm để thêm category vào bài viết
+addCategoryToPost(100, 3);

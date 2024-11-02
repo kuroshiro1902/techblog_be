@@ -1,6 +1,7 @@
 import { timestampSchema } from '@/common/models/timestamp/timestamp.type';
 import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { z } from 'zod';
+import { categorySchema, ECategoryField } from '../../category/validators/category.schema';
 
 export enum EPostField {
   id = 'id',
@@ -12,6 +13,7 @@ export enum EPostField {
   createdAt = 'createdAt',
   updatedAt = 'updatedAt',
   author = 'author',
+  categories = 'categories'
 }
 
 export const postFieldSchema = z.nativeEnum(EPostField);
@@ -41,15 +43,17 @@ export const postSchema = z.object({
     .pick({ [EUserField.id]: true, [EUserField.name]: true, [EUserField.avatarUrl]: true })
     .partial()
     .optional(),
+  [EPostField.categories]: z.array(categorySchema.pick({ [ECategoryField.id]: true })).default([]),
   ...timestampSchema(),
-});
+}).strict();
 
 export const createPostSchema = postSchema.pick({
   [EPostField.title]: true,
   [EPostField.content]: true,
   [EPostField.isPublished]: true,
   [EPostField.thumbnailUrl]: true,
-});
+  [EPostField.categories]: true
+}).strict();
 
 export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.id,
@@ -59,4 +63,5 @@ export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.thumbnailUrl,
   EPostField.slug,
   EPostField.author,
-];
+  EPostField.categories
+] as const;

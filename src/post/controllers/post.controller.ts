@@ -1,41 +1,38 @@
 import { Request, Response } from '@/types';
 import { serverError } from '../../common/errors/serverError';
 import { PostService } from '../services/post.service';
-import { EPostField } from '../validators/post.schema';
+import { EPostField, POST_PUBLIC_FIELDS } from '../validators/post.schema';
 import { EUserField } from '@/user/validators/user.schema';
 import { STATUS_CODE } from '@/common/constants/StatusCode';
+import { Prisma } from '@prisma/client';
 
 export const PostController = {
-  async getPosts(req: Request, res: Response) {
+  async getPosts(req: Request<{}, {}, {
+    search?: string,
+    author?: string,
+    pageIndex?: number,
+    pageSize?: number,
+    orderBy?: `${typeof POST_PUBLIC_FIELDS[number]}:${Prisma.SortOrder}`
+  }>, res: Response) {
     try {
       const {
-        search: _search,
-        author: _author,
-        pageIndex: _pageIndex,
-        pageSize: _pageSize,
+        search,
+        author,
+        pageIndex,
+        pageSize,
+        orderBy
       } = req.query;
 
       const isPublished: boolean = req.data?.[EPostField.isPublished] || true;
-      let search: string = '',
-        author: string = '',
-        pageIndex: number | undefined = undefined,
-        pageSize: number | undefined = undefined;
-      if (typeof _search === 'string') {
-        search = _search;
-      }
-      if (typeof _author === 'string') {
-        author = _author;
-      }
-      if (typeof _pageIndex === 'string') {
-        pageIndex = isNaN(+_pageIndex) ? 1 : +_pageIndex;
-      }
-      if (typeof _pageSize === 'string') {
-        pageSize = isNaN(+_pageSize) ? 0 : +_pageSize;
-      }
+      const orderByQuery = orderBy?.split?.(':')
       const findResponse = await PostService.findMany({
-        pageIndex,
-        pageSize,
-        input: { search, author, isPublished },
+        pageIndex: +(pageIndex ?? 1),
+        pageSize: +(pageSize ?? 12),
+        input: { search, author, isPublished, },
+        orderBy: {
+          field: orderByQuery?.[0] as any,
+          order: orderByQuery?.[1] as any
+        }
       });
       res.json({ isSuccess: true, data: findResponse });
     } catch (error) {
@@ -82,7 +79,7 @@ export const PostController = {
           .json({ isSuccess: false, message: 'Unauthorized.' });
         return;
       }
-      const createdPost = await PostService.create(data, authorId);
+      const createdPost = await PostService.createOne(data, authorId);
       res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: createdPost });
     } catch (error) {
       return serverError(res, error);
