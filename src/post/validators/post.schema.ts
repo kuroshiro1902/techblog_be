@@ -55,6 +55,8 @@ export const createPostSchema = postSchema.pick({
   [EPostField.categories]: true
 }).strict();
 
+export const updatePostSchema = createPostSchema.partial();
+
 export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.id,
   EPostField.title,

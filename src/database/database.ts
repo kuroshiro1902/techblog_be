@@ -9,12 +9,13 @@ DB.$on('query', (e: any) => {
   console.log('Duration: ' + e.duration + 'ms');
 });
 
-const Elastic: ElasticClient | undefined = new ElasticClient({
-  node: ENVIRONMENT.ELASTIC_NODE,
-  auth: {
-    username: ENVIRONMENT.ELASTIC_AUTH_USERNAME,
-    password: ENVIRONMENT.ELASTIC_AUTH_PASSWORD
-  },
-});
-// = undefined
+const Elastic: ElasticClient | undefined =
+  // new ElasticClient({
+  //   node: ENVIRONMENT.ELASTIC_NODE,
+  //   auth: {
+  //     username: ENVIRONMENT.ELASTIC_AUTH_USERNAME,
+  //     password: ENVIRONMENT.ELASTIC_AUTH_PASSWORD
+  //   },
+  // });
+  undefined
 export { DB, Elastic };

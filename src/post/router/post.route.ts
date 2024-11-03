@@ -10,5 +10,6 @@ const postRouter = Router();
 postRouter.get('/', publishedPost, PostController.getPosts);
 postRouter.get('/detail', publishedPost, PostController.getDetailPost);
 postRouter.post('/create', authMiddleware, PostController.createPost);
+postRouter.put('/update/:postId', authMiddleware, PostController.updatePost)
 
 export default postRouter;

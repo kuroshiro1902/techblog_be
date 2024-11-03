@@ -8,7 +8,7 @@ import { z } from "zod";
 export const createOne = async (post: z.input<typeof createPostSchema>, authorId: number) => {
   const validatedPost = createPostSchema.parse(post);
   const validatedAuthorId = userSchema.shape[EUserField.id].parse(authorId);
-  const slugLength = 10;
+  const slugUidLength = 10;
   const slug =
     slugify(validatedPost[EPostField.title], {
       trim: true,
@@ -16,11 +16,11 @@ export const createOne = async (post: z.input<typeof createPostSchema>, authorId
       locale: 'vi',
     }) +
     '-' +
-    uid(slugLength);
+    uid(slugUidLength);
   const createdPost = await DB.post.create({
     data: {
       ...validatedPost,
-      title: validatedPost[EPostField.title].substring(0, 255 - slugLength - 1),
+      title: validatedPost[EPostField.title].substring(0, 255 - slugUidLength - 1),
       slug,
       author: { connect: { id: validatedAuthorId } },
       categories: { connect: validatedPost[EPostField.categories] },

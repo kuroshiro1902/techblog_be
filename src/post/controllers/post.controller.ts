@@ -5,6 +5,7 @@ import { EPostField, POST_PUBLIC_FIELDS } from '../validators/post.schema';
 import { EUserField } from '@/user/validators/user.schema';
 import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { Prisma } from '@prisma/client';
+import { z } from 'zod';
 
 export const PostController = {
   async getPosts(req: Request<{}, {}, {
@@ -81,6 +82,23 @@ export const PostController = {
       }
       const createdPost = await PostService.createOne(data, authorId);
       res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: createdPost });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+  async updatePost(req: Request, res: Response) {
+    try {
+      const { data } = req.body;
+      const authorId = req.user?.[EUserField.id];
+      const postId = req.params.postId;
+      if (!authorId) {
+        res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Unauthorized.' });
+        return;
+      }
+      const updatedPost = await PostService.updateOne(+postId, data, authorId);
+      res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: updatedPost });
     } catch (error) {
       return serverError(res, error);
     }

@@ -30,5 +30,5 @@ const main = async () => {
   });
 };
 
-// main();
+main();
 JobServer()

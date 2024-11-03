@@ -2,8 +2,11 @@ npx prisma migrate dev --name <migration_name>
 npx prisma db seed
 dùng middleware để xác thực input, có thể dùng lại middleware cho nhiều api
 
-- Kết nối elastic search, job đồng bộ bài viết
+--
+
+[DONE] Kết nối elastic search, job đồng bộ bài viết
   + Chỉ đồng bộ những thông tin cần dùng để search
   vd nội dung, tên tác giả, ... (có thể đồng bộ dạng: {...post, author: {id: 1, name: 'Sơn'}})
   Số tương tác thì có thể không cần đồng bộ, truy vấn trực tiếp trong postgres luôn.
 
+[] Service: chỉnh sửa bài viết, nếu chỉnh sửa các trường được đồng bộ lên es thì cập nhật lại status trong post log.
