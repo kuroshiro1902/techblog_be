@@ -79,6 +79,8 @@ export const syncPostToElasticSearchJob = async () => {
   })()
 
   schedule.scheduleJob(syncPostToElasticSearchRule.rule, async () => {
+    console.log('!!! RUN JOB!');
+
     const syncCount = await syncPostToElasticSearchByBatch();
     console.log({ syncCount });
   });

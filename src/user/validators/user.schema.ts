@@ -23,9 +23,10 @@ export const userFieldSchema = z.nativeEnum(EUserField);
 
 export const userSchema = z.object({
   [EUserField.id]: z
-    .number({ message: 'ID phải là chữ số lớn hơn 0.' })
+    .number({ message: 'ID phải là chữ số nguyên lớn hơn 0.' })
+    .int({ message: 'ID phải là chữ số nguyên lớn hơn 0.' })
     .max(Number.MAX_SAFE_INTEGER)
-    .positive({ message: 'ID phải là chữ số lớn hơn 0.' }),
+    .positive({ message: 'ID phải là chữ số nguyên lớn hơn 0.' }),
   [EUserField.name]: z
     .string()
     .min(3, { message: 'Tên phải có ít nhất 3 ký tự.' })
@@ -78,13 +79,33 @@ export const USER_PUBLIC_FIELDS: EUserField[] = [
   EUserField.roles,
 ];
 
-export const userCreateSchema = userSchema.pick({
-  [EUserField.name]: true,
-  [EUserField.username]: true,
-  [EUserField.password]: true,
-  [EUserField.avatarUrl]: true,
-  [EUserField.email]: true,
-  [EUserField.description]: true,
-  [EUserField.dob]: true,
-});
+export const USER_PUBLIC_FIELDS_SELECT: Prisma.UserSelect = USER_PUBLIC_FIELDS.reduce(
+  (prev, f) => ({ ...prev, [f]: true }),
+  {} as Prisma.UserSelect
+);
+
+export const userCreateSchema = userSchema
+  .pick({
+    [EUserField.name]: true,
+    [EUserField.username]: true,
+    [EUserField.password]: true,
+    [EUserField.avatarUrl]: true,
+    [EUserField.email]: true,
+    [EUserField.description]: true,
+    [EUserField.dob]: true,
+  })
+  .strict();
+
+export const userUpdateSchema = userSchema
+  .pick({
+    [EUserField.name]: true,
+    [EUserField.password]: true,
+    [EUserField.avatarUrl]: true,
+    [EUserField.email]: true,
+    [EUserField.description]: true,
+    [EUserField.dob]: true,
+  })
+  .partial()
+  .strict()
 export type TUserCreateInput = z.infer<typeof userCreateSchema>;
+export type TUserUpdateInput = z.infer<typeof userUpdateSchema>;

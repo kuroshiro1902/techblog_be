@@ -3,14 +3,19 @@ import {
   EUserField,
   TUserCreateInput,
   USER_PUBLIC_FIELDS,
+  USER_PUBLIC_FIELDS_SELECT,
   userCreateSchema,
+  userSchema,
 } from '../validators/user.schema';
 import { findMany, TUserFindManyQuery } from './queries/findMany.query';
 import { ERoleName, ROLES } from '../constants/role.constant';
+import { updateOneExceptPassword } from './mutations/updateOneExceptPassword.mutation';
+import { findUnique } from './queries/findUnique.query';
 
 export const UserService = {
+  findUnique,
   findMany,
-
+  updateOneExceptPassword,
   async findOne(query: TUserFindManyQuery) {
     const users = await this.findMany({ ...query, pageSize: 1 });
     return users.pop();
@@ -27,24 +32,4 @@ export const UserService = {
     return createdUser;
   },
 
-  // async updateUser(
-  //   userId: number,
-  //   patchValue: Omit<User.TUser, 'id' | 'username'>
-  // ): Promise<User.TUser> {
-  //   const parsedUserId = User.userSchema.shape.id.parse(userId);
-  //   const parsedPatchValue = User.userSchema
-  //     .omit({ id: true, username: true })
-  //     .parse(patchValue);
-
-  //   const user = await User.UserModel.findByPk(parsedUserId);
-  //   if (!user) {
-  //     throw new Error(`Không tìm thấy user với id ${parsedUserId}`);
-  //   }
-
-  //   const updatedUser = await DB.transaction(async (transaction) => {
-  //     const updatedUser = await user.update(parsedPatchValue, { transaction });
-  //     await updatedUser.$set(EUserRoleAssociation.roleAssociationKey, parsedPatchValue);
-  //   });
-  //   return UserServiceHelper.mapToPlainUser(updatedUser);
-  // },
 };
