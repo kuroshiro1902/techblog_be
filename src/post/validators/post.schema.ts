@@ -2,6 +2,7 @@ import { timestampSchema } from '@/common/models/timestamp/timestamp.type';
 import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { z } from 'zod';
 import { categorySchema, ECategoryField } from '../../category/validators/category.schema';
+import { TRating } from './rating.schema';
 
 export enum EPostField {
   id = 'id',
@@ -41,10 +42,10 @@ export const postSchema = z.object({
 
   [EPostField.thumbnailUrl]: z
     .string()
-    .max(500, { message: 'Url thumbnail không được vượt quá 500 ký tự.' })
-    .optional(),
+    .max(500, { message: 'Url thumbnail không được vượt quá 500 ký tự.' }).nullable()
+    .nullable().optional(),
 
-  [EPostField.isPublished]: z.boolean().optional(),
+  [EPostField.isPublished]: z.boolean().nullable().optional(),
 
   [EPostField.views]: z.number().default(0),
 
@@ -58,10 +59,12 @@ export const postSchema = z.object({
       [EUserField.name]: true,
       [EUserField.avatarUrl]: true
     })
-    .optional(),
+    .nullable().optional(),
 
   ...timestampSchema(),
 }).strict();
+
+export type TPost = z.infer<typeof postSchema> & { rating?: TRating | null }
 
 export const createPostSchema = postSchema.pick({
   [EPostField.title]: true,

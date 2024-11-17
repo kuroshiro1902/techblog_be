@@ -42,24 +42,24 @@ export const userSchema = z.object({
   [EUserField.description]: z
     .string()
     .max(1000, { message: 'Mô tả tối đa 1000 ký tự.' })
-    .optional(),
+    .nullable().optional(),
   [EUserField.email]: z
     .string()
     .email({ message: 'Email chưa đúng định dạng.' })
     .max(255, { message: 'Email tối đa 255 ký tự.' })
-    .optional(),
+    .nullable().optional(),
   [EUserField.dob]: z
     .number()
     .int()
     .positive({
       message: 'Ngày tháng năm sinh chưa đúng định dạng timestamp 10 chữ số.',
     })
-    .optional(),
+    .nullable().optional(),
   [EUserField.avatarUrl]: z
     .string()
     .url({ message: 'Url ảnh không đúng định dạng.' })
     .max(500, { message: 'Url tối đa 500 ký tự.' })
-    .optional(),
+    .nullable().optional(),
   [EUserField.roles]: z.array(roleSchema).default([ROLES[ERoleName.USER]]),
   ...timestampSchema(),
 }) satisfies z.Schema<Prisma.UserUncheckedCreateWithoutRolesInput>;

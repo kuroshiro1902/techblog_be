@@ -43,9 +43,9 @@ export const PostController = {
         },
         orderBy: !!orderBy ? { field: field as any, order: order as any } : undefined,
       }
-      const findResponse = await PostService.findMany(query);
+      const post = await PostService.findMany(query);
 
-      res.json({ isSuccess: true, data: findResponse });
+      res.json({ isSuccess: true, data: post });
     } catch (error) {
       return serverError(res, error);
     }
@@ -65,30 +65,29 @@ export const PostController = {
 
   async getDetailPost(req: Request, res: Response) {
     try {
+      console.log('REG.USER', req.user);
+
       const { slug } = req.query;
-      const isPublished: boolean = req.data?.[EPostField.isPublished] || true;
+      const isPublished: boolean | undefined = req.data?.[EPostField.isPublished];
+
       if (typeof slug === 'string') {
-        const findResponse = await PostService.findMany({
-          pageIndex: 1,
-          pageSize: 1,
-          input: { isPublished, slug },
+        const post = await PostService.findUnique({
+          input: { slug, isPublished }
         });
-        if (findResponse.data.length <= 0) {
+        if (!post) {
           res.json({
             isSuccess: false,
             message: 'Bài viết không tồn tại, vui lòng kiểm tra lại.',
           });
         } else {
-          console.log('data0', findResponse.data[0]);
 
-          if (findResponse.data[0].id && findResponse.data[0].views >= 0 && findResponse.data[0].author.id) {
+          if (post.id && post.views >= 0 && post?.author?.id) {
             console.log('Tăng view');
-
-            PostService.updateOne(findResponse.data[0].id, { views: findResponse.data[0].views + 1 }, findResponse.data[0].author.id)
+            PostService.updateOne(post.id, { views: post.views + 1 }, post.author.id)
           }
           res.json({
             isSuccess: true,
-            data: findResponse.data[0],
+            data: post,
           });
         }
       } else {
@@ -132,4 +131,29 @@ export const PostController = {
       return serverError(res, error);
     }
   },
+
+  async getOwnRatingOfPost(req: Request<unknown, { postId?: string }>, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      const { postId = '' } = req.params;
+
+      const rating = await PostService.findRatingOfUser(+postId, userId)
+      return res.json({ isSuccess: true, data: rating });
+    } catch (error) {
+      return serverError(res, error);
+
+    }
+  },
+
+  async ratingPost(req: Request<{ score?: number }, { postId?: string }>, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      const { score } = req.body;
+      const { postId = '' } = req.params;
+      const { data } = await PostService.rating(+postId, userId, score);
+      return res.json({ isSuccess: true, data });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  }
 };

@@ -21,9 +21,10 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 - [done] Thêm lọc theo category, sort - 17/11/2024
 
 [] Trang cá nhân user khác
-[] Comment bài viết
-[] Đánh giá bài viết
+[] Comment bài viết     !!!!!!!!!!!!!!!!!!!
+[done] Đánh giá bài viết
 
 [] Score
 - [done] Hiển thị view - 17/11/2024
-- [] Hiển thị rating
+- [done] Hiển thị rating
+- [] số lượt người đánh giá bài viết (trang detail)

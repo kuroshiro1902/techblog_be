@@ -10,6 +10,7 @@ import {
   POST_PUBLIC_FIELDS,
   postFieldSchema,
   postSchema,
+  TPost,
 } from '@/post/validators/post.schema';
 import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { Prisma } from '@prisma/client';
@@ -24,19 +25,19 @@ const findPostQuerySchema = z.object({
     authorId: userSchema.shape[EUserField.id].optional(),
     isPublished: postSchema.shape.isPublished,
   }),
-  orderBy: 
-      z.object({
-        field: z.enum([EPostField.id, EPostField.createdAt, EPostField.views]).default(EPostField.createdAt),
-        order: z.nativeEnum(Prisma.SortOrder).default(Prisma.SortOrder.desc),
-      })
-    .default({ field: EPostField.createdAt, order: Prisma.SortOrder.desc }),
+  orderBy:
+    z.object({
+      field: z.enum([EPostField.id, EPostField.createdAt, EPostField.views]).default(EPostField.createdAt),
+      order: z.nativeEnum(Prisma.SortOrder).default(Prisma.SortOrder.desc),
+    })
+      .default({ field: EPostField.createdAt, order: Prisma.SortOrder.desc }),
   ...paginationSchema.shape,
 });
 
 
 export type TFindPostQuery = Partial<z.input<typeof findPostQuerySchema>>;
 
-export const findMany = async (query?: TFindPostQuery) => {
+export const findMany = async (query?: TFindPostQuery): Promise<{ data: TPost[], pageInfo: TPageInfo }> => {
   const validatedQuery = findPostQuerySchema.parse(query);
   const {
     input,
@@ -69,7 +70,7 @@ export const findMany = async (query?: TFindPostQuery) => {
   }
 
   // SELECT
-  const select: Record<EPostField, any> = (
+  const select: Prisma.PostSelect = (
     fields && fields.length > 0 ? fields : POST_PUBLIC_FIELDS
   ).reduce((prev, field) => ({ ...prev, [field]: true }), {} as Record<EPostField, true>);
   if (select.author) {
@@ -92,14 +93,25 @@ export const findMany = async (query?: TFindPostQuery) => {
   // Fetch posts
   const posts = await DB.post.findMany({ where, select, orderBy, take, skip });
 
+  const postsWithAverageScore = await DB.rating.groupBy({
+    by: ['postId'], //Tính trung bình đánh giá theo từng post
+    _avg: {
+      score: true
+    },
+    // orderBy: { _avg: { score: 'desc' } },
+    where: { postId: { in: posts.map(p => p.id) } }
+  });
+  const postScore = postsWithAverageScore.reduce((prev, { _avg, postId }) => ({ ...prev, [postId]: _avg.score ?? 0 }), {} as { [postId: number]: number })
+  console.log({ postsWithAverageScore });
+
   // Return data with pageInfo
   return {
-    data: posts,
+    data: posts.map((p) => ({ ...p, rating: { score: postScore[p.id] } })),
     pageInfo: {
       pageIndex,
       pageSize,
       hasNextPage,
       totalPage,
-    } as TPageInfo,
+    },
   };
 };
