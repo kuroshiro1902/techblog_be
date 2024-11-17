@@ -6,38 +6,60 @@ import { EUserField } from '@/user/validators/user.schema';
 import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { TFindPostQuery } from '../services/queries/findMany.query';
 
 export const PostController = {
   async getPosts(req: Request<{}, {}, {
     search?: string,
-    author?: string,
-    pageIndex?: number,
-    pageSize?: number,
-    orderBy?: `${typeof POST_PUBLIC_FIELDS[number]}:${Prisma.SortOrder}`
+    authorId?: string,
+    categoryId?: string[] | string,
+    pageIndex?: string,
+    pageSize?: string,
+    orderBy?: `${typeof POST_PUBLIC_FIELDS[number]}-${Prisma.SortOrder}`
   }>, res: Response) {
     try {
       const {
         search,
-        author,
+        authorId,
         pageIndex,
         pageSize,
-        orderBy
+        orderBy = '',
+        categoryId: categoryIds,
       } = req.query;
 
-      const isPublished: boolean = req.data?.[EPostField.isPublished] || true;
-      const orderByQuery = orderBy?.split?.(':')
-      const findResponse = await PostService.findMany({
+      const isPublished: boolean | undefined = req.data?.[EPostField.isPublished];
+
+      // Parse orderBy as an array of objects
+      const [field, order] = orderBy.split('-');
+
+      const query: TFindPostQuery = {
         pageIndex: +(pageIndex ?? 1),
         pageSize: +(pageSize ?? 12),
-        input: { search, author, isPublished, },
-        orderBy: {
-          field: orderByQuery?.[0] as any,
-          order: orderByQuery?.[1] as any
-        }
-      });
+        input: {
+          search,
+          isPublished,
+          authorId: authorId ? +authorId : undefined,
+          categoryIds: Array.isArray(categoryIds) ? categoryIds.map((cid) => +cid) : categoryIds ? [+categoryIds] : []
+        },
+        orderBy: !!orderBy ? { field: field as any, order: order as any } : undefined,
+      }
+      const findResponse = await PostService.findMany(query);
+
       res.json({ isSuccess: true, data: findResponse });
     } catch (error) {
       return serverError(res, error);
+    }
+  },
+
+
+  async getOwnPosts(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      // @ts-ignore
+      return PostController.getPosts({ ...req, query: { authorId: userId, orderBy: 'views-desc', pageSize: 4 } }, res);
+    } catch (error) {
+      return serverError(res, error);
+
     }
   },
 
@@ -57,9 +79,16 @@ export const PostController = {
             message: 'Bài viết không tồn tại, vui lòng kiểm tra lại.',
           });
         } else {
+          console.log('data0', findResponse.data[0]);
+
+          if (findResponse.data[0].id && findResponse.data[0].views >= 0 && findResponse.data[0].author.id) {
+            console.log('Tăng view');
+
+            PostService.updateOne(findResponse.data[0].id, { views: findResponse.data[0].views + 1 }, findResponse.data[0].author.id)
+          }
           res.json({
             isSuccess: true,
-            data: findResponse.data?.[0],
+            data: findResponse.data[0],
           });
         }
       } else {

@@ -4,7 +4,7 @@ import {
   TPageInfo,
 } from '@/common/models/pagination/pagination.model';
 import { DB } from '@/database/database';
-import { ECategoryField } from '@/category/validators/category.schema';
+import { categorySchema, ECategoryField } from '@/category/validators/category.schema';
 import {
   EPostField,
   POST_PUBLIC_FIELDS,
@@ -19,18 +19,20 @@ const findPostQuerySchema = z.object({
   fields: z.array(postFieldSchema).default(POST_PUBLIC_FIELDS),
   input: z.object({
     slug: z.string().trim().max(255).optional(),
-    search: z.string().trim().max(255, 'Tìm kiếm tối đa 255 ký tự').trim().default(''),
-    author: z.string().max(255, 'Tên tác giả tối đa 255 ký tự').trim().default(''),
+    search: z.string().trim().max(255, 'Tìm kiếm tối đa 255 ký tự').toLowerCase().default(''),
+    categoryIds: z.array(categorySchema.shape[ECategoryField.id]).default([]),
+    authorId: userSchema.shape[EUserField.id].optional(),
     isPublished: postSchema.shape.isPublished,
   }),
-  orderBy: z
-    .object({
-      field: z.enum([EPostField.id, EPostField.createdAt]).default(EPostField.createdAt),
-      order: z.nativeEnum(Prisma.SortOrder).default(Prisma.SortOrder.desc),
-    })
+  orderBy: 
+      z.object({
+        field: z.enum([EPostField.id, EPostField.createdAt, EPostField.views]).default(EPostField.createdAt),
+        order: z.nativeEnum(Prisma.SortOrder).default(Prisma.SortOrder.desc),
+      })
     .default({ field: EPostField.createdAt, order: Prisma.SortOrder.desc }),
   ...paginationSchema.shape,
 });
+
 
 export type TFindPostQuery = Partial<z.input<typeof findPostQuerySchema>>;
 
@@ -41,7 +43,7 @@ export const findMany = async (query?: TFindPostQuery) => {
     fields,
     pageIndex: _pageIndex,
     pageSize: _pageSize,
-    orderBy: orderCond,
+    orderBy: orderCondition,
   } = validatedQuery;
   const { pageIndex, pageSize, skip, take } = paginationOptions({
     pageIndex: _pageIndex,
@@ -51,15 +53,19 @@ export const findMany = async (query?: TFindPostQuery) => {
   const mode = 'insensitive';
 
   // WHERE
-  const where: Prisma.PostWhereInput = { isPublished: input.isPublished || true };
+  const where: Prisma.PostWhereInput = { isPublished: input.isPublished };
   if (input.search) {
     where[EPostField.title] = { contains: input.search, mode };
+    // where[EPostField.author] = { name: { contains: input.search, mode } };
   }
-  if (input.author) {
-    where[EPostField.author] = { name: { contains: input.author, mode } };
+  if (input.authorId) {
+    where[EPostField.author] = { id: input.authorId };
   }
   if (input.slug) {
     where[EPostField.slug] = { equals: input.slug, mode: 'default' };
+  }
+  if (input.categoryIds.length > 0) {
+    where[EPostField.categories] = { some: { id: { in: input.categoryIds } } }
   }
 
   // SELECT
@@ -70,11 +76,13 @@ export const findMany = async (query?: TFindPostQuery) => {
     select.author = { select: { [EUserField.id]: true, [EUserField.name]: true } };
   }
   if (select.categories) {
-    select.categories = { select: { [ECategoryField.id]: true, [ECategoryField.name]: true } }
+    select.categories = { select: { [ECategoryField.id]: true, [ECategoryField.name]: true } };
   }
 
   // ORDER BY
-  const orderBy: Prisma.PostOrderByWithRelationInput = { [orderCond.field]: orderCond.order };
+  const orderBy: Prisma.PostOrderByWithRelationInput = {
+    [orderCondition.field]: orderCondition.order,
+  };
 
   // Calculate totalCount to determine total pages and hasNextPage
   const totalCount = await DB.post.count({ where });

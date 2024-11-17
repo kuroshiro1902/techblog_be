@@ -12,11 +12,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ReactionType {
-  LIKE
-  DISLIKE
-}
-
 enum PostStatus {
   SYNCED
   NOT_SYNCED
@@ -37,7 +32,7 @@ model User {
   roles       Role[]
   posts       Post[]
 
-  Reaction Reaction[]
+  ratings Rating[]
 }
 
 model Role {
@@ -58,7 +53,7 @@ model Post {
   views        Int        @default(0)
   categories   Category[]
   comments     Comment[]
-  reactions    Reaction[]
+  ratings      Rating[]
   author       User       @relation(fields: [authorId], references: [id])
   authorId     Int
   createdAt    DateTime   @default(now())
@@ -81,14 +76,14 @@ model Comment {
   parentCommentId Int?
 }
 
-model Reaction {
-  id           Int          @id @default(autoincrement())
-  user         User         @relation(fields: [userId], references: [id])
-  userId       Int
-  post         Post         @relation(fields: [postId], references: [id])
-  postId       Int
-  reactionType ReactionType
-  createdAt    DateTime     @default(now())
+model Rating {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  score     Int
+  createdAt DateTime @default(now())
 
   @@unique([userId, postId]) // Đảm bảo mỗi user chỉ có thể thả một cảm xúc cho mỗi bài viết
 }

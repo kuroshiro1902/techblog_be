@@ -13,7 +13,8 @@ export enum EPostField {
   createdAt = 'createdAt',
   updatedAt = 'updatedAt',
   author = 'author',
-  categories = 'categories'
+  categories = 'categories',
+  views = 'views'
 }
 
 export const postFieldSchema = z.nativeEnum(EPostField);
@@ -23,27 +24,42 @@ export const postSchema = z.object({
     .number({ message: 'ID phải là chữ số lớn hơn 0.' })
     .positive({ message: 'ID phải là chữ số lớn hơn 0.' })
     .max(Number.MAX_SAFE_INTEGER),
+
   [EPostField.title]: z
     .string()
     .min(1, { message: 'Tiêu đề phải có ít nhất 1 ký tự.' })
     .max(255, { message: 'Tiêu đề không được vượt quá 255 ký tự.' }),
+
   [EPostField.slug]: z
     .string()
     .min(1, { message: 'Slug phải có ít nhất 1 ký tự.' })
     .max(255, { message: 'Slug không được vượt quá 255 ký tự.' }),
+
   [EPostField.content]: z
     .string()
     .min(1, { message: 'Nội dung bài viết không được bỏ trống.' }),
+
   [EPostField.thumbnailUrl]: z
     .string()
-    .max(255, { message: 'Url thumbnail không được vượt quá 500 ký tự.' })
+    .max(500, { message: 'Url thumbnail không được vượt quá 500 ký tự.' })
     .optional(),
-  [EPostField.isPublished]: z.boolean().default(true),
+
+  [EPostField.isPublished]: z.boolean().optional(),
+
+  [EPostField.views]: z.number().default(0),
+
+  [EPostField.categories]: z
+    .array(categorySchema.pick({ [ECategoryField.id]: true }))
+    .default([]),
+
   [EPostField.author]: userSchema
-    .pick({ [EUserField.id]: true, [EUserField.name]: true, [EUserField.avatarUrl]: true })
-    .partial()
+    .pick({
+      [EUserField.id]: true,
+      [EUserField.name]: true,
+      [EUserField.avatarUrl]: true
+    })
     .optional(),
-  [EPostField.categories]: z.array(categorySchema.pick({ [ECategoryField.id]: true })).default([]),
+
   ...timestampSchema(),
 }).strict();
 
@@ -55,12 +71,13 @@ export const createPostSchema = postSchema.pick({
   [EPostField.categories]: true
 }).strict();
 
-export const updatePostSchema = createPostSchema.partial();
+export const updatePostSchema = createPostSchema.merge(postSchema.pick({ [EPostField.views]: true })).partial();
 
 export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.id,
   EPostField.title,
   EPostField.content,
+  EPostField.views,
   EPostField.createdAt,
   EPostField.thumbnailUrl,
   EPostField.slug,

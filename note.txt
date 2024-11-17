@@ -11,5 +11,19 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 
 [DONE] 03/11 Service: chỉnh sửa bài viết, nếu chỉnh sửa các trường được đồng bộ lên es thì cập nhật lại status trong post log.
 
-[] Profile
-- getMe
+[DONE] Profile
+- [done] getMe
+- [done] update
+- [] change avatar
+- [done] own posts
+
+[DONE] Chỉnh sửa search
+- [done] Thêm lọc theo category, sort - 17/11/2024
+
+[] Trang cá nhân user khác
+[] Comment bài viết
+[] Đánh giá bài viết
+
+[] Score
+- [done] Hiển thị view - 17/11/2024
+- [] Hiển thị rating
