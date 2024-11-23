@@ -46,6 +46,7 @@ model Role {
 model Post {
   id           Int        @id @default(autoincrement())
   title        String     @db.VarChar(255)
+  description  String?    @db.Text
   slug         String     @unique @db.VarChar(255)
   content      String     @db.Text
   thumbnailUrl String?    @db.VarChar(500)
