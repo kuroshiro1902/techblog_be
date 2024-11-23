@@ -15,7 +15,8 @@ export enum EPostField {
   updatedAt = 'updatedAt',
   author = 'author',
   categories = 'categories',
-  views = 'views'
+  views = 'views',
+  ratings = 'ratings',
 }
 
 export const postFieldSchema = z.nativeEnum(EPostField);

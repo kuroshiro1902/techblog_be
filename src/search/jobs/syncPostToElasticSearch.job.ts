@@ -5,6 +5,7 @@ import schedule from "node-schedule";
 import { TPost_S } from "../models/post.s.model";
 import { Logger } from "../../common/utils/logger.util";
 
+
 const condition: Prisma.PostWhereInput = { PostLog: { some: { OR: [{ status: "NOT_SYNCED" }, { status: "NEED_SYNC" }] } } };
 const batchSize = 100;
 const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
@@ -20,7 +21,7 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
     }
     try {
       // Lấy các bài viết cần đồng bộ
-      const postsToSync: TPost_S[] = await tx.post.findMany({
+      const _postsToSync = await tx.post.findMany({
         where: condition,
         take: batchSize,
         select: {
@@ -29,9 +30,16 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
           slug: true,
           content: true,
           categories: { select: { id: true, name: true } },
-          createdAt: true
+          createdAt: true,
+          views: true,
+          ratings: { select: { score: true } }
         }
       });
+
+      const postsToSync: TPost_S[] = _postsToSync.map(({ ratings, ...rest }) => ({
+        ...rest,
+        ratings: +(ratings.reduce((acc, { score }) => acc + (score ?? 0), 0) / ratings.length).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+      }))
 
       if (postsToSync.length <= 0) {
         await Logger.info('No posts to sync');
