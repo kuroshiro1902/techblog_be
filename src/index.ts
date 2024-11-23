@@ -3,7 +3,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import router from './router';
-import { JobServer } from './@job';
+import { JobServer } from './@job/syncPostToElasticsearch';
 
 const main = async () => {
   const app = express();
