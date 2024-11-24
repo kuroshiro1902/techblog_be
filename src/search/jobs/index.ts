@@ -3,8 +3,8 @@ import { syncPostToElasticSearchJob } from "./syncPostToElasticSearch.job"
 
 
 export const JobServer = async () => {
-  if (!Elastic){
+  if (!Elastic) {
     return;
   }
-  syncPostToElasticSearchJob();
+  syncPostToElasticSearchJob().catch(err => { });
 }

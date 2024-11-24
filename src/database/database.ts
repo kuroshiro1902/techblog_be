@@ -2,8 +2,9 @@ import { ENVIRONMENT } from '@/common/environments/environment';
 import { Client as ElasticClient } from '@elastic/elasticsearch';
 import { PrismaClient } from '@prisma/client';
 
-// const log = ['query', 'info', 'warn', 'error']
-const DB = new PrismaClient({ log: [] });
+// const log = ['query', 'info', 'warn', 'error'] as any[];
+const log = [] as any[];
+const DB = new PrismaClient({ log });
 // @ts-ignore
 DB.$on('query', (e: any) => {
   console.log('Params: ' + e.params);

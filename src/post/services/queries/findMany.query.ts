@@ -85,13 +85,13 @@ export const findMany = async (query?: TFindPostQuery): Promise<{ data: TPost[],
     [orderCondition.field]: orderCondition.order,
   };
 
+  // Fetch posts
+  const posts = await DB.post.findMany({ where, select, orderBy, take, skip });
+
   // Calculate totalCount to determine total pages and hasNextPage
   const totalCount = await DB.post.count({ where });
   const totalPage = Math.ceil(totalCount / pageSize);
-  const hasNextPage = pageIndex < totalPage - 1;
-
-  // Fetch posts
-  const posts = await DB.post.findMany({ where, select, orderBy, take, skip });
+  const hasNextPage = skip + posts.length < totalCount;
 
   const postsWithAverageScore = await DB.rating.groupBy({
     by: ['postId'], //Tính trung bình đánh giá theo từng post

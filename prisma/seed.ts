@@ -123,4 +123,6 @@ async function setDefaultStatusPosts() {
 
 }
 
-// setDefaultStatusPosts();
+(() => {
+  prisma.postLog.updateMany({ data: { status: 'NEED_SYNC' }, where: { postId: { not: 0 } } })
+})()

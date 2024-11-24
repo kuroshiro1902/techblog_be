@@ -28,3 +28,10 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 - [done] Hiển thị view - 17/11/2024
 - [done] Hiển thị rating
 - [] số lượt người đánh giá bài viết (trang detail)
+
+
+!important: Triển khai luôn việc đồng bộ job lên es và search bằng es.
+- [done] Những trường cần đồng bộ:
+  + những trường cần tìm kiếm bằng search
+  + những trường ít cần đồng bộ lại
+- [] Cập nhật lại sync_log khi các trường cần đồng bộ của một bản ghi bị thay đổi khi gọi api cập nhật
