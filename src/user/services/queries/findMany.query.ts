@@ -24,6 +24,7 @@ const findManyQuerySelectSchema = z
       }),
       z.boolean().default(true),
     ]),
+    [EUserField.comments]: z.boolean().default(true),
   })
   .optional();
 const findManyQuerySchema = z.object({
@@ -119,9 +120,9 @@ export const findMany = async (query: TUserFindManyQuery) => {
             !select.roles.id && !select.roles.name
               ? { name: true }
               : {
-                  id: select.roles.id ?? false,
-                  name: select.roles.name ?? false,
-                },
+                id: select.roles.id ?? false,
+                name: select.roles.name ?? false,
+              },
         };
       } else {
         selectFields.avatarUrl = select.roles;

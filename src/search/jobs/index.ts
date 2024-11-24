@@ -6,5 +6,5 @@ export const JobServer = async () => {
   if (!Elastic) {
     return;
   }
-  syncPostToElasticSearchJob();
+  syncPostToElasticSearchJob().catch(err => { });
 }

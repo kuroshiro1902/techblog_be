@@ -7,6 +7,9 @@ import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { TFindPostQuery } from '../services/queries/findMany.query';
+import { parseNumeric } from '@/common/utils/parseNumeric.util';
+import { CommentService } from '../services/comment.service';
+import { createCommentSchema } from '../validators/comment.schema';
 
 export const PostController = {
   async getPosts(req: Request<{}, {}, {
@@ -151,6 +154,50 @@ export const PostController = {
       const { score } = req.body;
       const { postId = '' } = req.params;
       const { data } = await PostService.rating(+postId, userId, score);
+      return res.json({ isSuccess: true, data });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  // load comments
+  async loadComments(req: Request<unknown, unknown, {
+    postId?: string,
+    parentCommentId?: string,
+    pageIndex?: string,
+    pageSize?: string
+  }>, res: Response) {
+    try {
+      const query = parseNumeric(req.query, ['pageIndex', 'pageSize', 'postId', 'parentCommentId']);
+      const data = await CommentService.loadComments(query);
+      return res.json({ isSuccess: true, data });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async createComment(req: Request, res: Response) {
+    try {
+      const { data } = req.body;
+      const authorId = req.user?.[EUserField.id];
+      if (!authorId) {
+        res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Unauthorized.' });
+        return;
+      }
+      const createdComment = await CommentService.createComment(data, authorId);
+      return res.json({ isSuccess: true, data: createdComment });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async ratingComment(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      const { score, commentId } = req.body;
+      const { data } = await CommentService.ratingComment(commentId, userId, score);
       return res.json({ isSuccess: true, data });
     } catch (error) {
       return serverError(res, error);

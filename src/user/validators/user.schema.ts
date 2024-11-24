@@ -17,6 +17,7 @@ export enum EUserField {
   updatedAt = 'updatedAt',
   roles = 'roles',
   posts = 'posts',
+  comments = 'comments'
 }
 
 export const userFieldSchema = z.nativeEnum(EUserField);

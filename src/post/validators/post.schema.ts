@@ -17,6 +17,7 @@ export enum EPostField {
   categories = 'categories',
   views = 'views',
   ratings = 'ratings',
+  comments = 'comments'
 }
 
 export const postFieldSchema = z.nativeEnum(EPostField);
@@ -86,5 +87,6 @@ export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.thumbnailUrl,
   EPostField.slug,
   EPostField.author,
-  EPostField.categories
+  EPostField.categories,
+  EPostField.comments
 ] as const;
