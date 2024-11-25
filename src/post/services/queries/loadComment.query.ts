@@ -2,25 +2,30 @@ import { paginationOptions, paginationSchema, TPagination } from "@/common/model
 import { DB } from "@/database/database";
 import { commentSchema, ECommentField } from "@/post/validators/comment.schema";
 import { EPostField, postSchema } from "@/post/validators/post.schema";
-import { COMMENT_SELECT, TCommentResponse } from "../constants/comment-select.const";
+import { COMMENT_SELECT } from "../constants/comment-select.const";
 import { Prisma } from "@prisma/client";
-import { ECommentRatingScore } from "@/post/constants/comment-rating-score.const";
+import { ERatingScore } from "@/post/constants/rating-score.const";
+import { EUserField } from "@/user/validators/user.schema";
+import { userSchema } from "@/user/validators/user.schema";
 
 type TLoadComments = TPagination & {
   postId?: number;
   parentCommentId?: number;
+  userId?: number;
 };
 
 export const loadComments = async ({
   postId: postId$,
   parentCommentId: parentCommentId$,
   pageIndex: pageIndex$,
-  pageSize: pageSize$
+  pageSize: pageSize$,
+  userId: userId$
 }: TLoadComments) => {
   const pagination = paginationSchema.parse({ pageIndex: pageIndex$, pageSize: pageSize$ });
   const { pageIndex, pageSize, skip, take } = paginationOptions(pagination);
   const postId = postSchema.shape[EPostField.id].optional().parse(postId$);
   const parentCommentId = commentSchema.shape[ECommentField.id].optional().parse(parentCommentId$);
+  const userId = userSchema.shape[EUserField.id].optional().parse(userId$);
 
   const where: Prisma.CommentWhereInput = {};
 
@@ -53,11 +58,13 @@ export const loadComments = async ({
 
   const transformedComments = comments.map(comment => {
     const ratings = comment.commentRatings || [];
-    const likes = ratings.filter(r => r.score === ECommentRatingScore.LIKE).length;
-    const dislikes = ratings.filter(r => r.score === ECommentRatingScore.DISLIKE).length;
+    const likes = ratings.filter(r => r.score === ERatingScore.LIKE).length;
+    const dislikes = ratings.filter(r => r.score === ERatingScore.DISLIKE).length;
+    // Lấy rating của user hiện tại
+    const ownRating = userId ? ratings.find(r => r.userId === userId)?.score : undefined;
 
     const { commentRatings, ...rest } = comment;
-    return { ...rest, likes, dislikes };
+    return { ...rest, rating: { likes, dislikes }, ownRating };
   });
 
   return {

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { ECommentRatingScore } from "@/post/constants/comment-rating-score.const";
+import { ERatingScore } from "@/post/constants/rating-score.const";
 
 export const COMMENT_SELECT: Prisma.CommentSelect = {
   id: true,
@@ -14,9 +14,11 @@ export const COMMENT_SELECT: Prisma.CommentSelect = {
   //     replies: true,
   //   }
   // },
+  
   commentRatings: {
     select: {
-      score: true
+      score: true,
+      userId: true,
     }
   }
 };

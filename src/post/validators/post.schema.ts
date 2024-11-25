@@ -3,6 +3,7 @@ import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { z } from 'zod';
 import { categorySchema, ECategoryField } from '../../category/validators/category.schema';
 import { TRating } from './rating.schema';
+import { TRatingInfo } from './ratingInfo.schema';
 
 export enum EPostField {
   id = 'id',
@@ -66,7 +67,7 @@ export const postSchema = z.object({
   ...timestampSchema(),
 }).strict();
 
-export type TPost = z.infer<typeof postSchema> & { rating?: TRating | null }
+export type TPost = z.infer<typeof postSchema> & { rating: TRatingInfo }
 
 export const createPostSchema = postSchema.pick({
   [EPostField.title]: true,
@@ -88,5 +89,5 @@ export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.slug,
   EPostField.author,
   EPostField.categories,
-  EPostField.comments
+  // EPostField.comments
 ] as const;

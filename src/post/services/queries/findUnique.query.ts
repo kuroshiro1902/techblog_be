@@ -16,6 +16,7 @@ import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { TRating } from '@/post/validators/rating.schema';
+import { ERatingScore } from '@/post/constants/rating-score.const';
 
 const findUniquePostQuerySchema = z.object({
   fields: z.array(postFieldSchema).default(POST_PUBLIC_FIELDS),
@@ -56,17 +57,25 @@ export const findUnique = async (query$?: TFindUniquePostQuery): Promise<TPost |
     return null;
   }
 
-  const rating = (await DB.rating.groupBy({
-    by: ['postId'], //Tính trung bình đánh giá theo từng post
-    _avg: {
-      score: true
-    },
-    where: { postId: post.id },
-  }))?.[0]?._avg ?? { score: null };
+  // Count likes and dislikes
+  const [likes, dislikes] = await Promise.all([
+    DB.rating.count({
+      where: {
+        postId: post.id,
+        score: ERatingScore.LIKE
+      }
+    }),
+    DB.rating.count({
+      where: {
+        postId: post.id,
+        score: ERatingScore.DISLIKE
+      }
+    })
+  ]);
 
   // Return data with pageInfo
   return {
     ...post,
-    rating: { score: rating.score || undefined }
+    rating: { likes, dislikes }
   };
 };

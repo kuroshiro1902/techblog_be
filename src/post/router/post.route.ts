@@ -18,5 +18,6 @@ postRouter.get('/', publishedPost, PostController.getPosts);
 
 postRouter.post('/comment/create', authMiddleware, PostController.createComment);
 postRouter.post('/comment/rating', authMiddleware, PostController.ratingComment);
-postRouter.get('/comments', publishedPost, PostController.loadComments);
+postRouter.put('/comment/update', authMiddleware, PostController.updateComment);
+postRouter.get('/comments', publishedPost, userMiddleware, PostController.loadComments);
 export default postRouter;

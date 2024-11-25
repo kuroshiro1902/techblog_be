@@ -1,10 +1,10 @@
 import { timestampSchema } from '@/common/models/timestamp/timestamp.type';
 import { z } from 'zod';
-import { ECommentRatingScore } from '../constants/comment-rating-score.const';
+import { ERatingScore } from '../constants/rating-score.const';
 
 export const commentRatingSchema = z.object({
-  score: z.number().int().min(ECommentRatingScore.DISLIKE).max(ECommentRatingScore.LIKE)
-    .default(ECommentRatingScore.NONE),
+  score: z.number().int().min(ERatingScore.DISLIKE).max(ERatingScore.LIKE)
+    .default(ERatingScore.NONE),
   ...timestampSchema()
 })
 

@@ -168,8 +168,9 @@ export const PostController = {
     pageSize?: string
   }>, res: Response) {
     try {
+      const userId = req.user?.[EUserField.id];
       const query = parseNumeric(req.query, ['pageIndex', 'pageSize', 'postId', 'parentCommentId']);
-      const data = await CommentService.loadComments(query);
+      const data = await CommentService.loadComments({ ...query, userId });
       return res.json({ isSuccess: true, data });
     } catch (error) {
       return serverError(res, error);
@@ -199,6 +200,32 @@ export const PostController = {
       const { score, commentId } = req.body;
       const { data } = await CommentService.ratingComment(commentId, userId, score);
       return res.json({ isSuccess: true, data });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async updateComment(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      const { data, commentId } = req.body;
+
+      if (!userId) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+
+      const updatedComment = await CommentService.updateComment(
+        +commentId,
+        userId,
+        data
+      );
+
+      return res.json({
+        isSuccess: true,
+        data: updatedComment
+      });
     } catch (error) {
       return serverError(res, error);
     }

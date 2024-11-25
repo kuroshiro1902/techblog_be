@@ -15,6 +15,8 @@ import {
 import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { ERatingScore } from '@/post/constants/rating-score.const';
+import { TRatingInfo } from '@/post/validators/ratingInfo.schema';
 
 const findPostQuerySchema = z.object({
   fields: z.array(postFieldSchema).default(POST_PUBLIC_FIELDS),
@@ -93,20 +95,34 @@ export const findMany = async (query?: TFindPostQuery): Promise<{ data: TPost[],
   const totalPage = Math.ceil(totalCount / pageSize);
   const hasNextPage = skip + posts.length < totalCount;
 
-  const postsWithAverageScore = await DB.rating.groupBy({
-    by: ['postId'], //Tính trung bình đánh giá theo từng post
-    _avg: {
-      score: true
-    },
-    // orderBy: { _avg: { score: 'desc' } },
-    where: { postId: { in: posts.map(p => p.id) } }
-  });
-  const postScore = postsWithAverageScore.reduce((prev, { _avg, postId }) => ({ ...prev, [postId]: _avg.score ?? 0 }), {} as { [postId: number]: number })
-  console.log({ postsWithAverageScore });
+  const postRatings = await Promise.all([
+    ...posts.map(post => DB.rating.count({
+      where: {
+        postId: post.id,
+        score: ERatingScore.LIKE
+      }
+    })),
+    ...posts.map(post => DB.rating.count({
+      where: {
+        postId: post.id,
+        score: ERatingScore.DISLIKE
+      }
+    }))
+  ]);
 
+  const postStats = posts.reduce((acc, post, index) => {
+    acc[post.id] = {
+      likes: postRatings[index],
+      dislikes: postRatings[index + posts.length]
+    };
+    return acc;
+  }, {} as { [postId: number]: TRatingInfo });
   // Return data with pageInfo
   return {
-    data: posts.map((p) => ({ ...p, rating: { score: postScore[p.id] } })),
+    data: posts.map((p) => ({
+      ...p,
+      rating: postStats[p.id] || { likes: 0, dislikes: 0 }
+    })),
     pageInfo: {
       pageIndex,
       pageSize,
