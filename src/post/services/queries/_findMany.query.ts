@@ -3,7 +3,7 @@ import {
   paginationSchema,
   TPageInfo,
 } from '@/common/models/pagination/pagination.model';
-import { DB, Elastic } from '@/database/database';
+import { DB } from '@/database/database';
 import { categorySchema, ECategoryField } from '@/category/validators/category.schema';
 import {
   EPostField,
@@ -17,8 +17,6 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { ERatingScore } from '@/post/constants/rating-score.const';
 import { TRatingInfo } from '@/post/validators/ratingInfo.schema';
-import { ENVIRONMENT } from '@/common/environments/environment';
-import { TPost_S } from '@/search/models/post.s.model';
 
 const findPostQuerySchema = z.object({
   fields: z.array(postFieldSchema).default(POST_PUBLIC_FIELDS),
@@ -50,77 +48,80 @@ export const findMany = async (query?: TFindPostQuery): Promise<{ data: TPost[],
     pageSize: _pageSize,
     orderBy: orderCondition,
   } = validatedQuery;
-
-  const { pageIndex, pageSize, skip } = paginationOptions({
+  const { pageIndex, pageSize, skip, take } = paginationOptions({
     pageIndex: _pageIndex,
     pageSize: _pageSize,
   });
 
-  if (!Elastic) {
-    throw new Error('Elasticsearch is not available');
-  }
+  const mode = 'insensitive';
 
-  // Build Elasticsearch query
-  const must: any[] = [];
-  const filter: any[] = [];
-
-  // Handle search
+  // WHERE
+  const where: Prisma.PostWhereInput = { isPublished: input.isPublished };
   if (input.search) {
-    must.push({
-      multi_match: {
-        query: input.search,
-        fields: ['title^2', 'content', 'description', 'author.name', 'categories.name'],
-        fuzziness: 'AUTO'
-      }
-    });
+    where[EPostField.title] = { contains: input.search, mode };
+    // where[EPostField.author] = { name: { contains: input.search, mode } };
   }
-
-  // Handle filters
-  if (typeof input.isPublished === 'boolean') {
-    filter.push({ term: { isPublished: input.isPublished } });
-  }
-
   if (input.authorId) {
-    filter.push({ term: { 'author.id': input.authorId } });
+    where[EPostField.author] = { id: input.authorId };
   }
-
-  if (input.categoryIds.length > 0) {
-    filter.push({
-      terms: { 'categories.id': input.categoryIds }
-    });
-  }
-
   if (input.slug) {
-    filter.push({ term: { slug: input.slug } });
+    where[EPostField.slug] = { equals: input.slug, mode: 'default' };
+  }
+  if (input.categoryIds.length > 0) {
+    where[EPostField.categories] = { some: { id: { in: input.categoryIds } } }
   }
 
-  // Execute Elasticsearch search
-  const { hits } = await Elastic.search<TPost_S>({
-    index: ENVIRONMENT.ELASTIC_POST_INDEX,
-    query: {
-      bool: {
-        must,
-        filter
-      }
-    },
-    sort: [
-      { [orderCondition.field]: orderCondition.order.toLowerCase() }
-    ],
-    from: skip,
-    size: pageSize
-  });
+  // SELECT
+  const select: Prisma.PostSelect = (
+    fields && fields.length > 0 ? fields : POST_PUBLIC_FIELDS
+  ).reduce((prev, field) => ({ ...prev, [field]: true }), {} as Record<EPostField, true>);
+  if (select.author) {
+    select.author = { select: { [EUserField.id]: true, [EUserField.name]: true } };
+  }
+  if (select.categories) {
+    select.categories = { select: { [ECategoryField.id]: true, [ECategoryField.name]: true } };
+  }
 
-  const posts = hits.hits.map(hit => hit._source).filter((p) => !!p);
-  const totalCount = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+  // ORDER BY
+  const orderBy: Prisma.PostOrderByWithRelationInput = {
+    [orderCondition.field]: orderCondition.order,
+  };
+
+  // Fetch posts
+  const posts = await DB.post.findMany({ where, select, orderBy, take, skip });
+
+  // Calculate totalCount to determine total pages and hasNextPage
+  const totalCount = await DB.post.count({ where });
   const totalPage = Math.ceil(totalCount / pageSize);
   const hasNextPage = skip + posts.length < totalCount;
 
+  const postRatings = await Promise.all([
+    ...posts.map(post => DB.rating.count({
+      where: {
+        postId: post.id,
+        score: ERatingScore.LIKE
+      }
+    })),
+    ...posts.map(post => DB.rating.count({
+      where: {
+        postId: post.id,
+        score: ERatingScore.DISLIKE
+      }
+    }))
+  ]);
+
+  const postStats = posts.reduce((acc, post, index) => {
+    acc[post.id] = {
+      likes: postRatings[index],
+      dislikes: postRatings[index + posts.length]
+    };
+    return acc;
+  }, {} as { [postId: number]: TRatingInfo });
+  // Return data with pageInfo
   return {
     data: posts.map((p) => ({
       ...p,
-      categories: p.categories || [],
-      // Sử dụng trực tiếp ratings từ Elasticsearch
-      rating: p.ratings
+      rating: postStats[p.id] || { likes: 0, dislikes: 0 }
     })),
     pageInfo: {
       pageIndex,

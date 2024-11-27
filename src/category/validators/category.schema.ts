@@ -18,7 +18,7 @@ export const categorySchema = z.object({
     .positive({ message: 'ID phải là chữ số lớn hơn 0.' })
     .max(Number.MAX_SAFE_INTEGER),
   [ECategoryField.name]: z
-    .string()
+    .string().trim()
     .min(1, { message: 'Tên danh mục phải có ít nhất 1 ký tự.' })
     .max(255, { message: 'Tên danh mục không được vượt quá 255 ký tự.' }),
   ...timestampSchema(),

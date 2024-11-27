@@ -1,6 +1,6 @@
 import { ENVIRONMENT } from "@/common/environments/environment";
 import { DB, Elastic } from "@/database/database";
-import { Prisma } from "@prisma/client";
+import { PostStatus, Prisma } from "@prisma/client";
 import schedule from "node-schedule";
 import { TPost_S } from "../models/post.s.model";
 import { Logger } from "../../common/utils/logger.util";
@@ -27,40 +27,73 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
         select: {
           id: true,
           title: true,
-          slug: true,
           content: true,
-          categories: { select: { id: true, name: true } },
-          createdAt: true,
+          description: true,
+          slug: true,
+          isPublished: true,
           views: true,
-          ratings: { select: { score: true } }
+          author: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          categories: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          ratings: {
+            select: {
+              score: true
+            }
+          },
+          createdAt: true,
         }
       });
 
-      const postsToSync: TPost_S[] = _postsToSync.map(({ ratings, ...rest }) => ({
-        ...rest,
-        ratings: +(ratings.reduce((acc, { score }) => acc + (score ?? 0), 0) / ratings.length).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
-      }))
+      // Transform data theo mapping
+      const postsToSync: TPost_S[] = _postsToSync.map(post => {
+        // Tính likes và dislikes
+        const likes = post.ratings.filter(r => r.score === 1).length;
+        const dislikes = post.ratings.filter(r => r.score === -1).length;
+
+        return {
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          description: post.description ?? '',
+          slug: post.slug,
+          isPublished: post.isPublished ?? false,
+          views: post.views,
+          author: post.author ?? { id: 0, name: 'Unknown' },
+          categories: post.categories ?? [],
+          createdAt: post.createdAt,
+          ratings: { likes, dislikes }
+        };
+      });
 
       if (postsToSync.length <= 0) {
         await Logger.info('No posts to sync');
         return { count: 0 };
       }
-      // Thực hiện bulk upsert lên Elasticsearch
+
+      // Bulk upsert
       const { items } = await Elastic.bulk({
-        refresh: true, operations: postsToSync.flatMap((post) => {
-          return [
-            {
-              update: {
-                _index: ENVIRONMENT.ELASTIC_POST_INDEX,
-                _id: '' + post.id,
-              },
-            },
-            {
-              doc: post,
-              doc_as_upsert: true,
-            },
-          ]
-        })
+        refresh: true,
+        operations: postsToSync.flatMap(post => [
+          {
+            update: {
+              _index: ENVIRONMENT.ELASTIC_POST_INDEX,
+              _id: post.id.toString()
+            }
+          },
+          {
+            doc: post,
+            doc_as_upsert: true
+          }
+        ])
       });
 
       // Xử lý phản hồi từ Elasticsearch

@@ -1,19 +1,23 @@
 import { EPostField } from "@/post/validators/post.schema";
+import { TRatingInfo } from "@/post/validators/ratingInfo.schema";
 
 export type TPost_S = {
   [EPostField.id]: number;
   [EPostField.title]: string;
-  [EPostField.slug]: string;
   [EPostField.content]: string;
+  [EPostField.slug]: string;
+  description?: string | null;
+  isPublished?: boolean | null;
+  [EPostField.views]: number;
+  author: {
+    id: number;
+    name: string;
+  };
   [EPostField.categories]: {
-    id: number, name?: string
+    id: number;
+    name: string;
   }[];
   [EPostField.createdAt]: Date;
-  [EPostField.ratings]: number;
-  [EPostField.views]: number;
-  // isPublished?: boolean;
-  // views?: number;
-  // author: { id: number, name: string };
-  //   updatedAt: Date
+  ratings: TRatingInfo;
 };
 

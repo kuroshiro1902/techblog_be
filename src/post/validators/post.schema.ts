@@ -53,7 +53,12 @@ export const postSchema = z.object({
   [EPostField.views]: z.number().default(0),
 
   [EPostField.categories]: z
-    .array(categorySchema.pick({ [ECategoryField.id]: true }))
+    .array(
+      z.object({
+        [ECategoryField.id]: categorySchema.shape[ECategoryField.id],
+        [ECategoryField.name]: categorySchema.shape[ECategoryField.name].optional()
+      })
+    )
     .default([]),
 
   [EPostField.author]: userSchema
