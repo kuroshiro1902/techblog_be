@@ -6,10 +6,9 @@ import { EUserField } from '@/user/validators/user.schema';
 import { STATUS_CODE } from '@/common/constants/StatusCode';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { TFindPostQuery } from '../services/queries/findMany.query';
+import { TSearchPostQuery } from '../services/queries/search.query';
 import { parseNumeric } from '@/common/utils/parseNumeric.util';
 import { CommentService } from '../services/comment.service';
-import { createCommentSchema } from '../validators/comment.schema';
 
 export const PostController = {
   async getPosts(req: Request<{}, {}, {
@@ -35,7 +34,7 @@ export const PostController = {
       // Parse orderBy as an array of objects
       const [field, order] = orderBy.split('-');
 
-      const query: TFindPostQuery = {
+      const query: TSearchPostQuery = {
         pageIndex: +(pageIndex ?? 1),
         pageSize: +(pageSize ?? 12),
         input: {
@@ -46,7 +45,7 @@ export const PostController = {
         },
         orderBy: !!orderBy ? { field: field as any, order: order as any } : undefined,
       }
-      const post = await PostService.findMany(query);
+      const post = await PostService.searchPosts(query);
 
       res.json({ isSuccess: true, data: post });
     } catch (error) {
@@ -58,11 +57,21 @@ export const PostController = {
   async getOwnPosts(req: Request, res: Response) {
     try {
       const userId = req.user?.[EUserField.id];
-      // @ts-ignore
-      return PostController.getPosts({ ...req, query: { authorId: userId, orderBy: 'views-desc', pageSize: 4 } }, res);
+      const { pageIndex, pageSize, isPublished } = req.query;
+      const query: TSearchPostQuery = {
+        pageIndex: +(pageIndex ?? 1),
+        pageSize: +(pageSize ?? 8),
+        input: {
+          authorId: userId,
+          isPublished: isPublished === 'true'
+        },
+        orderBy: { field: EPostField.createdAt, order: 'desc' }
+      };
+
+      const posts = await PostService.findMany(query);
+      res.json({ isSuccess: true, data: posts });
     } catch (error) {
       return serverError(res, error);
-
     }
   },
 
