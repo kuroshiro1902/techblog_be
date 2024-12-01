@@ -124,9 +124,5 @@ async function setDefaultStatusPosts() {
 }
 
 (() => {
-  prisma.postLog.updateMany({ data: { status: 'NEED_SYNC' }, where: { postId: { gt: 0 } } })
-    .then((p) => {
-      console.log({ p });
-
-    })
+  prisma.role.createMany({ data: [{ name: 'admin' }, { name: 'user' }] }).then((p) => console.log(p))
 })()

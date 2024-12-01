@@ -38,6 +38,7 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
               name: true
             }
           },
+          thumbnailUrl: true,
           categories: {
             select: {
               id: true,
@@ -65,6 +66,7 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
           content: post.content,
           description: post.description ?? '',
           slug: post.slug,
+          thumbnailUrl: post.thumbnailUrl ?? '',
           isPublished: post.isPublished ?? false,
           views: post.views,
           author: post.author ?? { id: 0, name: 'Unknown' },

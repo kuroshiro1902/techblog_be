@@ -9,6 +9,7 @@ export type TPost_S = {
   description?: string | null;
   isPublished?: boolean | null;
   [EPostField.views]: number;
+  [EPostField.thumbnailUrl]?: string | null;
   author: {
     id: number;
     name: string;

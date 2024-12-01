@@ -229,5 +229,29 @@ export const PostController = {
     } catch (error) {
       return serverError(res, error);
     }
+  },
+
+  async deleteComment(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      const { commentId } = req.params;
+      if (!userId) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Invalid request' });
+      }
+
+      const result = await CommentService.deleteComment(
+        +(commentId ?? ''),
+        userId
+      );
+
+      return res.json({
+        isSuccess: true,
+        data: result
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
   }
 };

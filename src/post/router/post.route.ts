@@ -20,4 +20,9 @@ postRouter.post('/comment/create', authMiddleware, PostController.createComment)
 postRouter.post('/comment/rating', authMiddleware, PostController.ratingComment);
 postRouter.put('/comment/update', authMiddleware, PostController.updateComment);
 postRouter.get('/comments', publishedPost, userMiddleware, PostController.loadComments);
+postRouter.delete(
+  '/comments/:commentId',
+  authMiddleware,
+  PostController.deleteComment
+);
 export default postRouter;

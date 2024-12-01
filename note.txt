@@ -24,14 +24,19 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 [done] Comment bài viết     !!!!!!!!!!!!!!!!!!!
 [done] Đánh giá bài viết
 
-[] Score
+[DONE] Score
 - [done] Hiển thị view - 17/11/2024
 - [done] Hiển thị rating
 - [done] số lượt like, dislike
-
 
 !important: Triển khai luôn việc đồng bộ job lên es và search bằng es.
 - [done] Những trường cần đồng bộ:
   + những trường cần tìm kiếm bằng search
   + những trường ít cần đồng bộ lại
 - [done] Cập nhật lại sync_log khi các trường cần đồng bộ của một bản ghi bị thay đổi khi gọi api cập nhật
+
+[] Thông báo
+- Thông báo sẽ chứa id của item liên kết,
+  đối với post thì từ id của post sẽ lấy ra bài viết đó (xử lý fe, be: Lấy ra post bằng id).
+  đối với comment thì từ id của comment sẽ lấy ra post -> chuyển hướng đến post đó + #id của comment.
+  Truyền id comment => fe phải call api lấy ra comment đó.
