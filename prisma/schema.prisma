@@ -58,22 +58,24 @@ model Role {
 }
 
 model Post {
-  id           Int        @id() @default(autoincrement())
-  title        String     @db.VarChar(255)
-  description  String?    @db.Text()
-  slug         String     @unique() @db.VarChar(255)
-  content      String     @db.Text()
-  thumbnailUrl String?    @db.VarChar(500)
-  isPublished  Boolean?   @default(true)
-  views        Int        @default(0)
-  categories   Category[]
-  comments     Comment[]
-  ratings      Rating[]
-  author       User       @relation(fields: [authorId], references: [id])
-  authorId     Int
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt()
-  PostLog      PostLog[]
+  id             Int            @id() @default(autoincrement())
+  title          String         @db.VarChar(255)
+  description    String?        @db.Text()
+  slug           String         @unique() @db.VarChar(255)
+  content        String         @db.Text()
+  thumbnailUrl   String?        @db.VarChar(500)
+  isPublished    Boolean?       @default(true)
+  views          Int            @default(0)
+  categories     Category[]
+  comments       Comment[]
+  ratings        Rating[]
+  author         User           @relation(fields: [authorId], references: [id])
+  authorId       Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt()
+  PostLog        PostLog[]
+  revisions      PostRevision[]
+  currentVersion Int            @default(1)
 }
 
 model Comment {
@@ -149,4 +151,16 @@ model Notification {
   messageContent String?
 
   @@unique([itemType, itemId])
+}
+
+model PostRevision {
+  id         Int      @id @default(autoincrement())
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int
+  title      String   @db.VarChar(255)
+  slug       String   @db.VarChar(255)
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+  changeNote String?  @db.Text
+  isActive   Boolean  @default(false)
 }

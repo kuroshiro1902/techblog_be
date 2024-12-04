@@ -10,6 +10,7 @@ export enum EPostField {
   title = 'title',
   slug = 'slug',
   content = 'content',
+  description = 'description',
   thumbnailUrl = 'thumbnailUrl',
   isPublished = 'isPublished',
   createdAt = 'createdAt',
@@ -33,6 +34,9 @@ export const postSchema = z.object({
     .string()
     .min(1, { message: 'Tiêu đề phải có ít nhất 1 ký tự.' })
     .max(255, { message: 'Tiêu đề không được vượt quá 255 ký tự.' }),
+
+  [EPostField.description]: z
+    .string().max(5000).optional(),
 
   [EPostField.slug]: z
     .string()
@@ -79,7 +83,8 @@ export const createPostSchema = postSchema.pick({
   [EPostField.content]: true,
   [EPostField.isPublished]: true,
   [EPostField.thumbnailUrl]: true,
-  [EPostField.categories]: true
+  [EPostField.categories]: true,
+  [EPostField.description]: true
 }).strict();
 
 export const updatePostSchema = createPostSchema.merge(postSchema.pick({ [EPostField.views]: true })).partial();
@@ -94,5 +99,7 @@ export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.slug,
   EPostField.author,
   EPostField.categories,
+  EPostField.isPublished,
+  EPostField.description
   // EPostField.comments
 ] as const;

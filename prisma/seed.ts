@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { fa, faker } from '@faker-js/faker';
 import slugify from 'slugify';
-
+import axios from 'axios';
 const prisma = new PrismaClient();
 function getRandomThumbnailUrl() {
   // Sinh ngẫu nhiên giá trị width từ 300 đến 600
@@ -122,7 +122,3 @@ async function setDefaultStatusPosts() {
   console.log(a.count);
 
 }
-
-(() => {
-  prisma.role.createMany({ data: [{ name: 'admin' }, { name: 'user' }] }).then((p) => console.log(p))
-})()

@@ -69,7 +69,7 @@ export const searchPosts = async (query?: TSearchPostQuery): Promise<{ data: TPo
     must.push({
       multi_match: {
         query: input.search,
-        fields: ['title^2', 'content', 'description', 'author.name', 'categories.name'],
+        fields: ['title^2', 'content', /*'author.name', 'categories.name'*/],
         fuzziness: 'AUTO'
       }
     });
@@ -104,6 +104,7 @@ export const searchPosts = async (query?: TSearchPostQuery): Promise<{ data: TPo
       }
     },
     sort: [
+      { _score: {order:  'desc'}  },
       { [orderCondition.field]: orderCondition.order.toLowerCase() }
     ],
     from: skip,
@@ -118,6 +119,7 @@ export const searchPosts = async (query?: TSearchPostQuery): Promise<{ data: TPo
   return {
     data: posts.map((p) => ({
       ...p,
+      description: p.description ?? '',
       categories: p.categories || [],
       // Sử dụng trực tiếp ratings từ Elasticsearch
       rating: p.ratings

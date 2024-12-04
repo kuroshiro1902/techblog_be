@@ -35,6 +35,18 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
   + những trường ít cần đồng bộ lại
 - [done] Cập nhật lại sync_log khi các trường cần đồng bộ của một bản ghi bị thay đổi khi gọi api cập nhật
 
+[done] Quản lý phiên bản bài viết
+
+[done] Bài nháp (isPublished khi create)
+
+[done] Fix bug không hiện content khi update bài viết, không submit được
+
+[] các hoạt động gần đây
+
+[] Thống kê của user
+
+[] Danh sách yêu thích
+
 [] Thông báo
 - Thông báo sẽ chứa id của item liên kết,
   đối với post thì từ id của post sẽ lấy ra bài viết đó (xử lý fe, be: Lấy ra post bằng id).

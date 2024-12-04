@@ -8,21 +8,24 @@ import { userMiddleware } from '@/user/middlewares/user.middleware';
  * /posts
  */
 const postRouter = Router();
-postRouter.get('/detail', publishedPost, PostController.getDetailPost);
+postRouter.get('/detail', publishedPost, userMiddleware, PostController.getDetailPost);
 postRouter.get('/me', authMiddleware, PostController.getOwnPosts);
 postRouter.post('/create', authMiddleware, PostController.createPost);
 postRouter.put('/update/:postId', authMiddleware, PostController.updatePost);
 postRouter.get('/rating/:postId', authMiddleware, PostController.getOwnRatingOfPost)
 postRouter.put('/rating/:postId', authMiddleware, publishedPost, PostController.ratingPost);
+postRouter.get(
+  '/revisions',
+  authMiddleware,
+  PostController.getPostRevisions
+);
+postRouter.post('/restore-revision', authMiddleware, PostController.restoreRevision);
 postRouter.get('/', publishedPost, PostController.getPosts);
 
 postRouter.post('/comment/create', authMiddleware, PostController.createComment);
 postRouter.post('/comment/rating', authMiddleware, PostController.ratingComment);
 postRouter.put('/comment/update', authMiddleware, PostController.updateComment);
 postRouter.get('/comments', publishedPost, userMiddleware, PostController.loadComments);
-postRouter.delete(
-  '/comments/:commentId',
-  authMiddleware,
-  PostController.deleteComment
-);
+postRouter.delete('/comments/:commentId', authMiddleware, PostController.deleteComment);
+
 export default postRouter;

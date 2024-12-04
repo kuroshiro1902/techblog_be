@@ -77,10 +77,9 @@ export const PostController = {
 
   async getDetailPost(req: Request, res: Response) {
     try {
-      console.log('REG.USER', req.user);
-
+      const userId = req.user?.[EUserField.id];
       const { slug } = req.query;
-      const isPublished: boolean | undefined = req.data?.[EPostField.isPublished];
+      const isPublished: boolean | undefined = userId ? undefined : req.data?.[EPostField.isPublished];
 
       if (typeof slug === 'string') {
         const post = await PostService.findUnique({
@@ -258,6 +257,44 @@ export const PostController = {
       return res.json({
         isSuccess: true,
         data: result
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+  async restoreRevision(req: Request, res: Response) {
+    try {
+      const { revisionId } = req.body;
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const restoredPost = await PostService.restoreRevision(revisionId, userId);
+      return res.json({ isSuccess: true, data: restoredPost });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async getPostRevisions(req: Request, res: Response) {
+    try {
+      const authorId = req.user?.[EUserField.id];
+      const { pageIndex, pageSize, postId } = req.query;
+
+      if (!authorId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+
+      const data = await PostService.getPostRevisions({
+        postId: +(postId ?? ''),
+        authorId,
+        pageIndex: pageIndex ? +(pageIndex as string) : undefined,
+        pageSize: pageSize ? +(pageSize as string) : undefined
+      });
+
+      res.json({
+        isSuccess: true,
+        data
       });
     } catch (error) {
       return serverError(res, error);

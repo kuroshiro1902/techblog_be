@@ -120,7 +120,7 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
       await Logger.error(`Sync failed: ${errorMsg}`);
       throw error;
     }
-  });
+  }, { timeout: 60000 });
 
   return transaction;
 }
