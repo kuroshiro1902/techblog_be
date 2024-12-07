@@ -22,6 +22,9 @@ postRouter.get(
 postRouter.post('/restore-revision', authMiddleware, PostController.restoreRevision);
 postRouter.get('/', publishedPost, PostController.getPosts);
 
+postRouter.get('/own-ratings', authMiddleware, PostController.getUserRatings);
+postRouter.get('/own-comments', authMiddleware, PostController.getUserComments);
+
 postRouter.post('/comment/create', authMiddleware, PostController.createComment);
 postRouter.post('/comment/rating', authMiddleware, PostController.ratingComment);
 postRouter.put('/comment/update', authMiddleware, PostController.updateComment);

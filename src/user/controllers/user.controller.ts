@@ -47,6 +47,22 @@ export const UserController = {
     }
   },
 
+  async updatePassword(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res
+          .status(STATUS_CODE.UNAUTHORIZED)
+          .json({ isSuccess: false, message: 'Unauthorize.' });
+      }
+      const { data } = req.body;
+      const updatedUser = await UserService.updatePassword(userId, data);
+      return res.status(STATUS_CODE.SUCCESS).json({ isSuccess: true, data: updatedUser })
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
   async searchUsers(req: Request<TUserFindManyQuery>, res: Response) {
     try {
       const { input: rawInput, select: rawSelect, pageIndex, pageSize } = req.body;

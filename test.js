@@ -6,7 +6,9 @@ const prisma = new p();
 // });
 
 prisma.rating
-  .updateMany({ data: { score: 1 }, where: { score: { gte: 1 } } })
-  .then((ratings) => {
-    console.log({ ratings });
-  });
+  .findMany({
+    where: { userId: 3 },
+    take: 8,
+    select: { post: { select: { slug: true, title: true } } },
+  })
+  .then((p) => console.log({ p }));

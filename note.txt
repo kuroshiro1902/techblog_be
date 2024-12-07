@@ -39,9 +39,15 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 
 [done] Bài nháp (isPublished khi create)
 
+[] Xóa bài viết
+
+[done] Đổi mật khẩu
+
 [done] Fix bug không hiện content khi update bài viết, không submit được
 
-[] các hoạt động gần đây
+[] Load comment ưu tiên (optional), logic: Query phân trang comment except comment được ưu tiên.
+
+[] các hoạt động gần đây -- in process
 
 [] Thống kê của user
 

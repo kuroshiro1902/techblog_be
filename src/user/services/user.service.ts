@@ -11,6 +11,7 @@ import { findMany, TUserFindManyQuery } from './queries/findMany.query';
 import { ERoleName, ROLES } from '../constants/role.constant';
 import { updateOneExceptPassword } from './mutations/updateOneExceptPassword.mutation';
 import { findUnique } from './queries/findUnique.query';
+import { updatePassword } from './mutations/updatePassword.mutation';
 
 export const UserService = {
   findUnique,
@@ -31,5 +32,6 @@ export const UserService = {
     });
     return createdUser;
   },
+  updatePassword,
 
 };

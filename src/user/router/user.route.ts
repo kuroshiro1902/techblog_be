@@ -13,7 +13,7 @@ const userRouter = Router();
 const meRouter = Router();
 meRouter.get('', UserController.getMe);
 meRouter.put('/update', UserController.updateMeExceptPassword);
-
+meRouter.put('/update-password', UserController.updatePassword)
 
 userRouter.use('/me', authMiddleware, meRouter)
 userRouter.post('/search', UserController.searchUsers);

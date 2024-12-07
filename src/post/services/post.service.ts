@@ -7,6 +7,8 @@ import { findRatingOfUser } from './queries/findRatingOfUser.query';
 import { findMany } from './queries/findMany.query';
 import { restoreRevision } from './mutations/restoreRevision.mutation';
 import { getPostRevisions } from './queries/getPostRevisions.query';
+import { findUserRatings } from './queries/findUserRatings.query';
+import { findUserComments } from './queries/findUserComments.query';
 
 export const PostService = {
   searchPosts,
@@ -17,5 +19,7 @@ export const PostService = {
   findRatingOfUser,
   findMany,
   restoreRevision,
-  getPostRevisions
+  getPostRevisions,
+  findUserRatings,
+  findUserComments
 };

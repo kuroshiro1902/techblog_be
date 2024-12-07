@@ -121,6 +121,7 @@ export const findMany = async (query?: TFindPostQuery): Promise<{ data: TPost[],
   return {
     data: posts.map((p) => ({
       ...p,
+      description: p.description ?? undefined,
       rating: postStats[p.id] || { likes: 0, dislikes: 0 }
     })),
     pageInfo: {

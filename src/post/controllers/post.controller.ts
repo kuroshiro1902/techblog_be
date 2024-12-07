@@ -299,5 +299,42 @@ export const PostController = {
     } catch (error) {
       return serverError(res, error);
     }
+  },
+
+  async getUserRatings(req: Request<unknown, unknown, {
+    pageIndex?: string,
+    pageSize?: string
+  }>, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const { pageIndex, pageSize } = parseNumeric(req.query, ['pageIndex', 'pageSize']);
+
+      const userRatings = await PostService.findUserRatings({ input: { userId }, pageIndex, pageSize })
+      return res.json({ isSuccess: true, data: userRatings })
+    } catch (error) {
+      return serverError(res, error);
+
+    }
+  },
+  async getUserComments(req: Request<unknown, unknown, {
+    pageIndex?: string,
+    pageSize?: string
+  }>, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const { pageIndex, pageSize } = parseNumeric(req.query, ['pageIndex', 'pageSize']);
+
+      const userComments = await PostService.findUserComments({ input: { userId }, pageIndex, pageSize })
+      return res.json({ isSuccess: true, data: userComments })
+    } catch (error) {
+      return serverError(res, error);
+
+    }
   }
 };
