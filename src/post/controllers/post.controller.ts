@@ -336,5 +336,57 @@ export const PostController = {
       return serverError(res, error);
 
     }
+  },
+  async addFavoritePost(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const postId = +(req.params.postId);
+      const favoritePost = await PostService.addFavoritePost(userId, postId);
+      return res.status(201).json({
+        isSuccess: true,
+        data: favoritePost
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+  // Xóa bài viết khỏi danh sách yêu thích
+  async deleteFavoritePost(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const postId = +(req.params.postId);
+
+      const result = await PostService.deleteFavoritePost({ userId, postId });
+      return res.json({ isSuccess: true, data: result });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+  // Lấy danh sách bài viết yêu thích của người dùng
+  async getFavoritePosts(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const { pageIndex, pageSize } = req.query;
+      const favoritePosts = await PostService.getFavoritePosts({
+        userId,
+        pageIndex: pageIndex ? +(pageIndex as string) : undefined,
+        pageSize: pageSize ? +(pageSize as string) : undefined
+      });
+      return res.json({
+        isSuccess: true,
+        data: favoritePosts
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
   }
 };

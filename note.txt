@@ -21,6 +21,7 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 - [done] Thêm lọc theo category, sort - 17/11/2024
 
 [] Trang cá nhân user khác
+[] Xác nhận mật khẩu khi đăng ký
 [done] Comment bài viết     !!!!!!!!!!!!!!!!!!!
 [done] Đánh giá bài viết
 
@@ -47,14 +48,17 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 
 [] Load comment ưu tiên (optional), logic: Query phân trang comment except comment được ưu tiên.
 
-[] các hoạt động gần đây -- in process
+[done] các hoạt động gần đây
 
 [] Thống kê của user
 
-[] Danh sách yêu thích
+[] Danh sách yêu thích -- in process
 
 [] Thông báo
 - Thông báo sẽ chứa id của item liên kết,
   đối với post thì từ id của post sẽ lấy ra bài viết đó (xử lý fe, be: Lấy ra post bằng id).
   đối với comment thì từ id của comment sẽ lấy ra post -> chuyển hướng đến post đó + #id của comment.
   Truyền id comment => fe phải call api lấy ra comment đó.
+
+VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
+Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.

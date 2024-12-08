@@ -31,22 +31,23 @@ enum PostStatus {
 }
 
 model User {
-  id             Int             @id() @default(autoincrement())
-  name           String          @db.VarChar(255)
-  username       String          @unique()
-  password       String          @db.Text()
-  description    String?         @db.Text()
-  email          String?         @unique()
-  dob            Int?
-  avatarUrl      String?         @db.VarChar(500)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt()
-  roles          Role[]
-  posts          Post[]
-  ratings        Rating[]
-  comments       Comment[]
-  commentRatings CommentRating[]
-  notification   Notification[]
+  id                Int                @id() @default(autoincrement())
+  name              String             @db.VarChar(255)
+  username          String             @unique()
+  password          String             @db.Text()
+  description       String?            @db.Text()
+  email             String?            @unique()
+  dob               Int?
+  avatarUrl         String?            @db.VarChar(500)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt()
+  roles             Role[]
+  posts             Post[]
+  ratings           Rating[]
+  comments          Comment[]
+  commentRatings    CommentRating[]
+  notifications     Notification[]
+  userFavoritePosts UserFavoritePost[]
 }
 
 model Role {
@@ -58,24 +59,37 @@ model Role {
 }
 
 model Post {
-  id             Int            @id() @default(autoincrement())
-  title          String         @db.VarChar(255)
-  description    String?        @db.Text()
-  slug           String         @unique() @db.VarChar(255)
-  content        String         @db.Text()
-  thumbnailUrl   String?        @db.VarChar(500)
-  isPublished    Boolean?       @default(true)
-  views          Int            @default(0)
-  categories     Category[]
-  comments       Comment[]
-  ratings        Rating[]
-  author         User           @relation(fields: [authorId], references: [id])
-  authorId       Int
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt()
-  PostLog        PostLog[]
-  revisions      PostRevision[]
-  currentVersion Int            @default(1)
+  id                Int                @id() @default(autoincrement())
+  title             String             @db.VarChar(255)
+  description       String?            @db.Text()
+  slug              String             @unique() @db.VarChar(255)
+  content           String             @db.Text()
+  thumbnailUrl      String?            @db.VarChar(500)
+  isPublished       Boolean?           @default(true)
+  views             Int                @default(0)
+  categories        Category[]
+  comments          Comment[]
+  ratings           Rating[]
+  author            User               @relation(fields: [authorId], references: [id])
+  authorId          Int
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt()
+  PostLog           PostLog[]
+  revisions         PostRevision[]
+  currentVersion    Int                @default(1)
+  userFavoritePosts UserFavoritePost[]
+}
+
+model UserFavoritePost {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
 }
 
 model Comment {
