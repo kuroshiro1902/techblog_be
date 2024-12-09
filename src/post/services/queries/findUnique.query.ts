@@ -76,6 +76,7 @@ export const findUnique = async (query$?: TFindUniquePostQuery): Promise<TPost |
   // Return data with pageInfo
   return {
     ...post,
+    description: post.description ?? undefined,
     rating: { likes, dislikes }
   };
 };

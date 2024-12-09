@@ -388,5 +388,23 @@ export const PostController = {
     } catch (error) {
       return serverError(res, error);
     }
+  },
+  async checkFavoritePost(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+
+      if (!userId) {
+        return res.json({ isSuccess: true, data: null })
+      }
+      const postId = +(req.params.postId); // Lấy postId từ params
+
+      const fav = await PostService.isFavoritePost(postId, userId);
+      return res.json({
+        isSuccess: true,
+        data: fav
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
   }
 };

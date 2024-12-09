@@ -12,6 +12,8 @@ import { findUserComments } from './queries/findUserComments.query';
 import { getFavoritePosts } from './queries/getFavoritePosts.query';
 import { addFavoritePost } from './mutations/addFavoritePost.mutation';
 import { deleteFavoritePost } from './mutations/deleteFavoritePost.mutation';
+import { getFollowersWithNotification } from './queries/getFollowersWithNotification.query';
+import { isFavoritePost } from './queries/isFavoritePost.query';
 
 export const PostService = {
   searchPosts,
@@ -27,5 +29,7 @@ export const PostService = {
   findUserComments,
   getFavoritePosts,
   addFavoritePost,
-  deleteFavoritePost
+  isFavoritePost,
+  deleteFavoritePost,
+  getFollowersWithNotification
 };

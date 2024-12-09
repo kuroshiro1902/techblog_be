@@ -81,10 +81,11 @@ model Post {
 }
 
 model UserFavoritePost {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  postId    Int
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  postId       Int
+  notification Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
   post Post @relation(fields: [postId], references: [id])

@@ -4,6 +4,7 @@ import { EPostField, postSchema } from "@/post/validators/post.schema";
 import { z } from "zod";
 import { createCommentSchema } from "@/post/validators/comment.schema";
 import { COMMENT_SELECT } from "../constants/comment-select.const";
+import { NotificationService } from "@/notification/services/notification.service";
 
 export const createComment = async (
   comment: z.input<typeof createCommentSchema>,
@@ -34,7 +35,7 @@ export const createComment = async (
   const createdComment = await DB.comment.create({
     data: {
       content: validatedComment.content,
-      Post: {
+      post: {
         connect: { id: postId }
       },
       user: {
@@ -47,6 +48,12 @@ export const createComment = async (
       })
     },
     select: COMMENT_SELECT
+  });
+
+  NotificationService.handleNewPostComment({
+    postId,
+    comment: { content: createdComment.content },
+    user: { name: createdComment.user.name }
   });
 
   return createdComment;

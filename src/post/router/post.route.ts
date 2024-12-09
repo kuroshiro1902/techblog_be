@@ -14,9 +14,6 @@ postRouter.post('/create', authMiddleware, PostController.createPost);
 postRouter.put('/update/:postId', authMiddleware, PostController.updatePost);
 postRouter.get('/rating/:postId', authMiddleware, PostController.getOwnRatingOfPost)
 postRouter.put('/rating/:postId', authMiddleware, publishedPost, PostController.ratingPost);
-postRouter.post("/favorite/:postId", authMiddleware, PostController.addFavoritePost);
-postRouter.get("/favorites", authMiddleware, PostController.getFavoritePosts);
-postRouter.delete("/favorite/:postId", authMiddleware, PostController.deleteFavoritePost);
 postRouter.get('/revisions', authMiddleware, PostController.getPostRevisions);
 postRouter.post('/restore-revision', authMiddleware, PostController.restoreRevision);
 postRouter.get('/', publishedPost, PostController.getPosts);
@@ -29,5 +26,10 @@ postRouter.post('/comment/rating', authMiddleware, PostController.ratingComment)
 postRouter.put('/comment/update', authMiddleware, PostController.updateComment);
 postRouter.get('/comments', publishedPost, userMiddleware, PostController.loadComments);
 postRouter.delete('/comments/:commentId', authMiddleware, PostController.deleteComment);
+
+postRouter.get("/favorite/:postId", userMiddleware, PostController.checkFavoritePost);
+postRouter.post("/favorite/:postId", authMiddleware, PostController.addFavoritePost);
+postRouter.get("/favorites", authMiddleware, PostController.getFavoritePosts);
+postRouter.delete("/favorite/:postId", authMiddleware, PostController.deleteFavoritePost);
 
 export default postRouter;
