@@ -14,6 +14,7 @@ import { addFavoritePost } from './mutations/addFavoritePost.mutation';
 import { deleteFavoritePost } from './mutations/deleteFavoritePost.mutation';
 import { getFollowersWithNotification } from './queries/getFollowersWithNotification.query';
 import { isFavoritePost } from './queries/isFavoritePost.query';
+import { changePostNotification } from './mutations/changePostNotification.mutation';
 
 export const PostService = {
   searchPosts,
@@ -31,5 +32,6 @@ export const PostService = {
   addFavoritePost,
   isFavoritePost,
   deleteFavoritePost,
-  getFollowersWithNotification
+  getFollowersWithNotification,
+  changePostNotification
 };

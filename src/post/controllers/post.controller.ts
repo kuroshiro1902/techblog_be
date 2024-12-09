@@ -406,5 +406,21 @@ export const PostController = {
     } catch (error) {
       return serverError(res, error);
     }
+  },
+
+  async changePostNotification(req: Request, res: Response) {
+    try {
+      const postId = +req.params.postId;
+      const { notification } = req.body;
+      const userId = req.user?.[EUserField.id];
+      if (!userId) {
+        return res.status(STATUS_CODE.UNAUTHORIZED).json({ isSuccess: false, message: 'Unauthorized.' });
+      }
+      const fav = await PostService.changePostNotification(userId, postId, notification);
+      return res.json({ isSuccess: true, data: fav })
+    } catch (error) {
+      return serverError(res, error);
+
+    }
   }
 };

@@ -55,10 +55,13 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 [] Danh sách yêu thích -- in process
 
 [] Thông báo
-- Thông báo sẽ chứa id của item liên kết,
-  đối với post thì từ id của post sẽ lấy ra bài viết đó (xử lý fe, be: Lấy ra post bằng id).
-  đối với comment thì từ id của comment sẽ lấy ra post -> chuyển hướng đến post đó + #id của comment.
-  Truyền id comment => fe phải call api lấy ra comment đó.
+- [done] Thông báo sẽ chứa id của item liên kết,
+- [done] Đối với post thì từ id của post sẽ lấy ra bài viết đó.
+- [] đối với comment thì từ id của comment sẽ lấy ra post -> chuyển hướng đến post đó + #id của comment (optional).
+- [done] Đăng kí thông báo
+- [done] Hủy thông báo
+- [] Thông báo reply comment
+- [] Trang danh sách thông báo
 
 VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
 Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.

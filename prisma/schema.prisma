@@ -164,8 +164,6 @@ model Notification {
   itemId         Int?
   messageTitle   String?
   messageContent String?
-
-  @@unique([itemType, itemId])
 }
 
 model PostRevision {

@@ -4,7 +4,7 @@ export type TNewPostCommentNotification = {
   /**
    * Người vừa comment vào bài viết.
    */
-  user: Pick<User, 'name'>,
+  user: Pick<User, 'id' | 'name'>,
   postId: number
   comment: Pick<Comment, 'content'>
 }

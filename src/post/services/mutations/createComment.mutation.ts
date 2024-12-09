@@ -53,7 +53,7 @@ export const createComment = async (
   NotificationService.handleNewPostComment({
     postId,
     comment: { content: createdComment.content },
-    user: { name: createdComment.user.name }
+    user: { name: createdComment.user.name, id: createdComment.userId ?? createdComment.user.id }
   });
 
   return createdComment;

@@ -1,7 +1,7 @@
 import { AuthService } from "@/user/services/auth.service";
 import { EUserField } from "@/user/validators/user.schema";
 import { Socket } from "socket.io";
-import { TSocketData } from "../model/socket-data.model";
+import { TSocketData } from "../models/socket-data.model";
 
 
 export const NotificationSocketService = {
