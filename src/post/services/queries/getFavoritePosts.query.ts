@@ -3,6 +3,7 @@ import { DB } from "@/database/database";
 import { EUserField } from "@/user/validators/user.schema";
 import { userSchema } from "@/user/validators/user.schema";
 import { EPostField } from "@/post/validators/post.schema";
+import { findMany } from "./findMany.query";
 
 type TGetFavoritePostsParams = TPagination & {
   userId: number;
@@ -28,22 +29,17 @@ export const getFavoritePosts = async ({
       take,
       skip,
       select: {
-        post: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-          }
-        },
-        createdAt: true
+        post: { select: { id: true } }
       }
     })
   ]);
 
+  const { data: posts } = await findMany({ input: { ids: favoritePosts.map(({ post }) => post.id) }, pageIndex: 1, pageSize, orderBy: { field: EPostField.createdAt, order: 'desc' } });
+
   const hasNextPage = skip + favoritePosts.length < totalCount;
   const totalPage = Math.ceil(totalCount / pageSize);
   return {
-    data: favoritePosts,
+    data: posts,
     pageInfo: {
       pageIndex,
       pageSize,

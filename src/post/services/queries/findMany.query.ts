@@ -21,6 +21,7 @@ import { TRatingInfo } from '@/post/validators/ratingInfo.schema';
 const findPostQuerySchema = z.object({
   fields: z.array(postFieldSchema).default(POST_PUBLIC_FIELDS),
   input: z.object({
+    ids: z.array(postSchema.shape[EPostField.id]).optional(),
     slug: z.string().trim().max(255).optional(),
     search: z.string().trim().max(255, 'Tìm kiếm tối đa 255 ký tự').toLowerCase().default(''),
     categoryIds: z.array(categorySchema.shape[ECategoryField.id]).default([]),
@@ -57,18 +58,22 @@ export const findMany = async (query?: TFindPostQuery): Promise<{ data: TPost[],
 
   // WHERE
   const where: Prisma.PostWhereInput = { isPublished: input.isPublished };
-  if (input.search) {
-    where[EPostField.title] = { contains: input.search, mode };
-    // where[EPostField.author] = { name: { contains: input.search, mode } };
-  }
-  if (input.authorId) {
-    where[EPostField.author] = { id: input.authorId };
-  }
-  if (input.slug) {
-    where[EPostField.slug] = { equals: input.slug, mode: 'default' };
-  }
-  if (input.categoryIds.length > 0) {
-    where[EPostField.categories] = { some: { id: { in: input.categoryIds } } }
+  if (input.ids) {
+    where[ECategoryField.id] = { in: input.ids }
+  } else {
+    if (input.search) {
+      where[EPostField.title] = { contains: input.search, mode };
+      // where[EPostField.author] = { name: { contains: input.search, mode } };
+    }
+    if (input.authorId) {
+      where[EPostField.author] = { id: input.authorId };
+    }
+    if (input.slug) {
+      where[EPostField.slug] = { equals: input.slug, mode: 'default' };
+    }
+    if (input.categoryIds.length > 0) {
+      where[EPostField.categories] = { some: { id: { in: input.categoryIds } } }
+    }
   }
 
   // SELECT

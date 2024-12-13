@@ -52,7 +52,7 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 
 [] Thống kê của user
 
-[] Danh sách yêu thích -- in process
+[done] Danh sách yêu thích
 
 [] Thông báo
 - [done] Thông báo sẽ chứa id của item liên kết,
@@ -61,7 +61,10 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 - [done] Đăng kí thông báo
 - [done] Hủy thông báo
 - [] Thông báo reply comment
-- [] Trang danh sách thông báo
+- [done] Trang danh sách thông báo
+
+[] Gợi ý
+- Tạo một rating với score = 0 thể hiện người dùng đã xem bài viết.
 
 VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
 Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.

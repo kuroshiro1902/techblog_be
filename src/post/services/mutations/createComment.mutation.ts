@@ -24,11 +24,11 @@ export const createComment = async (
       select: { postId: true }
     });
     if (!parentComment) {
-      throw new Error('Parent comment không tồn tại');
+      throw new Error('Bình luận này không còn khả dụng để trả lời');
     }
     postId = parentComment.postId;
   } else {
-    throw new Error('Phải có ít nhất một trong hai: postId hoặc parentCommentId');
+    throw new Error('Bình luận không này không được chỉ định bài viết hoặc bình luận trả lời.');
   }
 
   // Create comment

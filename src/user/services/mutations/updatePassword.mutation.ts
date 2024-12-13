@@ -14,9 +14,6 @@ const userUpdatePasswordSchema = z.object({ oldPassword: userSchema.shape[EUserF
 
 export const updatePassword = async (userId: number, input: TUserUpdatePassword) => {
   const { oldPassword, newPassword } = userUpdatePasswordSchema.parse(input);
-  if (oldPassword !== newPassword) {
-    throw new Error('Mật khẩu không khớp nhau.');
-  }
 
   const existedUser = await findUnique(userId, { password: true });
   if (!existedUser) {
