@@ -4,6 +4,7 @@ import { EPostField, postSchema } from "@/post/validators/post.schema";
 import { z } from "zod";
 import { createCommentSchema } from "@/post/validators/comment.schema";
 import { COMMENT_SELECT } from "../constants/comment-select.const";
+import { NotificationService } from "@/notification/services/notification.service";
 
 export const createComment = async (
   comment: z.input<typeof createCommentSchema>,
@@ -23,18 +24,18 @@ export const createComment = async (
       select: { postId: true }
     });
     if (!parentComment) {
-      throw new Error('Parent comment không tồn tại');
+      throw new Error('Bình luận này không còn khả dụng để trả lời');
     }
     postId = parentComment.postId;
   } else {
-    throw new Error('Phải có ít nhất một trong hai: postId hoặc parentCommentId');
+    throw new Error('Bình luận không này không được chỉ định bài viết hoặc bình luận trả lời.');
   }
 
   // Create comment
   const createdComment = await DB.comment.create({
     data: {
       content: validatedComment.content,
-      Post: {
+      post: {
         connect: { id: postId }
       },
       user: {
@@ -47,6 +48,12 @@ export const createComment = async (
       })
     },
     select: COMMENT_SELECT
+  });
+
+  NotificationService.handleNewPostComment({
+    postId,
+    comment: { content: createdComment.content },
+    user: { name: createdComment.user.name, id: createdComment.userId ?? createdComment.user.id }
   });
 
   return createdComment;

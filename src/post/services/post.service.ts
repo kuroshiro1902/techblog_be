@@ -9,6 +9,12 @@ import { restoreRevision } from './mutations/restoreRevision.mutation';
 import { getPostRevisions } from './queries/getPostRevisions.query';
 import { findUserRatings } from './queries/findUserRatings.query';
 import { findUserComments } from './queries/findUserComments.query';
+import { getFavoritePosts } from './queries/getFavoritePosts.query';
+import { addFavoritePost } from './mutations/addFavoritePost.mutation';
+import { deleteFavoritePost } from './mutations/deleteFavoritePost.mutation';
+import { getFollowersWithNotification } from './queries/getFollowersWithNotification.query';
+import { isFavoritePost } from './queries/isFavoritePost.query';
+import { changePostNotification } from './mutations/changePostNotification.mutation';
 
 export const PostService = {
   searchPosts,
@@ -21,5 +27,11 @@ export const PostService = {
   restoreRevision,
   getPostRevisions,
   findUserRatings,
-  findUserComments
+  findUserComments,
+  getFavoritePosts,
+  addFavoritePost,
+  isFavoritePost,
+  deleteFavoritePost,
+  getFollowersWithNotification,
+  changePostNotification
 };

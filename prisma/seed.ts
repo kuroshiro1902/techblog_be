@@ -120,5 +120,7 @@ async function setDefaultStatusPosts() {
   const posts = await prisma.post.findMany({ select: { id: true } });
   const a = await prisma.postLog.createMany({ data: posts.map((post) => ({ postId: post.id, status: "NOT_SYNCED" })) });
   console.log(a.count);
-
 }
+
+prisma.userFavoritePost.findMany().then((d) => console.log({ d }, d[0].userId)
+)

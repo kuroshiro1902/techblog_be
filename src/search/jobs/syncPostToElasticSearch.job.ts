@@ -54,6 +54,9 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
         }
       });
 
+      console.log('Số bài viết cần đồng bộ: ', _postsToSync.length);
+
+
       // Transform data theo mapping
       const postsToSync: TPost_S[] = _postsToSync.map(post => {
         // Tính likes và dislikes
