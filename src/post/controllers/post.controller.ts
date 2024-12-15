@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { TSearchPostQuery } from '../services/queries/search.query';
 import { parseNumeric } from '@/common/utils/parseNumeric.util';
 import { CommentService } from '../services/comment.service';
+import { ERatingScore } from '../constants/rating-score.const';
 
 export const PostController = {
   async getPosts(req: Request<{}, {}, {
@@ -92,9 +93,13 @@ export const PostController = {
           });
         } else {
 
-          if (post.id && post.views >= 0 && post?.author?.id) {
+          if (post.id && post?.author?.id) {
             console.log('Tăng view');
-            PostService.updateOne(post.id, { views: post.views + 1 }, post.author.id)
+            PostService.updateOne(post.id, { views: (post.views ?? 0) + 1 }, post.author.id);
+            if (userId) {
+              // Đánh dấu người dùng đã xem post này rồi
+              PostService.rating(post.id, userId, ERatingScore.NONE);
+            }
           }
           res.json({
             isSuccess: true,
