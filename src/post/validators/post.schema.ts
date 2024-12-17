@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { categorySchema, ECategoryField } from '../../category/validators/category.schema';
 import { TRating } from './rating.schema';
 import { TRatingInfo } from './ratingInfo.schema';
+import { Prisma } from '@prisma/client';
 
 export enum EPostField {
   id = 'id',
@@ -103,3 +104,8 @@ export const POST_PUBLIC_FIELDS: EPostField[] = [
   EPostField.description
   // EPostField.comments
 ] as const;
+
+export const POST_PUBLIC_FIELDS_SELECT: Prisma.PostSelect = POST_PUBLIC_FIELDS.reduce(
+  (prev, f) => ({ ...prev, [f]: true }),
+  {} as Prisma.PostSelect
+);

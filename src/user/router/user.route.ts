@@ -16,6 +16,7 @@ meRouter.put('/update', UserController.updateMeExceptPassword);
 meRouter.put('/update-password', UserController.updatePassword)
 
 userRouter.use('/me', authMiddleware, meRouter)
+userRouter.get('/profile/:userId', UserController.getUserProfile)
 userRouter.post('/search', UserController.searchUsers);
 userRouter.get('/:userId', UserController.getUserById);
 

@@ -17,6 +17,7 @@ const findManyQuerySelectSchema = z
     [EUserField.email]: z.boolean().default(true),
     [EUserField.dob]: z.boolean().default(true),
     [EUserField.avatarUrl]: z.boolean().default(true),
+    [EUserField.description]: z.boolean().default(true),
     [EUserField.roles]: z.union([
       z.object({
         id: z.boolean().default(false),
