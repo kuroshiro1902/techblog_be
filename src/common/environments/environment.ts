@@ -5,6 +5,8 @@ export const ENVIRONMENT = Object.freeze({
   refreshSecretKey: env.REFRESH_SECRET_KEY!,
   clientUrl: env.CLIENT_URL!,
   passwordSalt: +env.PASSWORD_SALT!,
+  RATE_LIMIT_WINDOW_MS: +env.RATE_LIMIT_WINDOW_MS!,
+  RATE_LIMIT_MAX_REQUESTS: +env.RATE_LIMIT_MAX_REQUESTS!,
   // cloudinary
   CLOUDINARY_NAME: env.CLOUDINARY_NAME!,
   CLOUDINARY_API_KEY: env.CLOUDINARY_API_KEY!,

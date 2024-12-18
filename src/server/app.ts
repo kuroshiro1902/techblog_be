@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import router from '@/router';
 import { ENVIRONMENT } from '@/common/environments/environment';
+import helmet from "helmet";
+import rateLimiteMiddleware from './middlewares/rateLimite.middleware';
 
 const app = express();
 app.use(bodyParser.json({ limit: '1mb' }));
@@ -13,6 +15,8 @@ app.use(
     credentials: true, // Cookies
   })
 );
+app.use(helmet());
+app.use(rateLimiteMiddleware);
 
 app.use(
   '/api',
