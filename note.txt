@@ -78,3 +78,7 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 [] Thêm trường để mô tả user: đã làm việc tại, nghề nghiệp, kĩ năng, giới tính, ...
 VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
 Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.
+
+build docker image: docker build -t be_blog .
+
+chạy docker container: docker run -p 4537:4537 be_blog

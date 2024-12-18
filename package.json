@@ -1,10 +1,11 @@
 {
-  "name": "techsolve_server",
+  "name": "techblog_server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "start": "node -r tsconfig-paths/register -r esbuild-runner/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "job": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/job.test.ts"
   },
@@ -21,9 +22,12 @@
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
+    "compute-cosine-similarity": "^1.1.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
+    "esbuild": "^0.24.0",
+    "esbuild-runner": "^2.2.2",
     "express": "^4.19.2",
     "graphql": "^16.9.0",
     "jsonwebtoken": "^9.0.2",
