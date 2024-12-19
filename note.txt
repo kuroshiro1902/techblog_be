@@ -20,7 +20,7 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 [DONE] Chỉnh sửa search
 - [done] Thêm lọc theo category, sort - 17/11/2024
 
-[] Trang cá nhân user khác
+[done] Trang cá nhân user khác
 [] Xác nhận mật khẩu khi đăng ký
 [done] Comment bài viết     !!!!!!!!!!!!!!!!!!!
 [done] Đánh giá bài viết
@@ -71,12 +71,12 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 
 [] thêm cột implicit rating để lưu điểm đánh giá ngầm của một user, đánh giá này sẽ được tính bằng sắc thái comment của user (user comment -> phân tích sắc thái -> điểm (ngầm - implicit) -> lưu db, để nếu user không đánh giá thì lấy điểm này). 
 
-[] Giao diện nền ảnh động: https://zustand-demo.pmnd.rs/
-
 [] Cài đặt hệ thống -> docker, elasticsearch (maybe), postgresql (maybe).
 
+[] Thêm nút theo dõi user vào trang profile -> Khi user này đăng bài mới -> emit cho các user theo dõi.
+
 [] Thêm trường để mô tả user: đã làm việc tại, nghề nghiệp, kĩ năng, giới tính, ...
-VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
+[] VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
 Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.
 
 build docker image: docker build -t be_blog .

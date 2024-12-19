@@ -48,6 +48,8 @@ model User {
   commentRatings    CommentRating[]
   notifications     Notification[]
   userFavoritePosts UserFavoritePost[]
+  followers         UserFollow[]       @relation("Followers")
+  following         UserFollow[]       @relation("Following")
 }
 
 model Role {
@@ -167,12 +169,26 @@ model Notification {
 }
 
 model PostRevision {
-  id         Int      @id @default(autoincrement())
-  post       Post     @relation(fields: [postId], references: [id])
-  postId     Int
-  title      String   @db.VarChar(255)
-  slug       String   @db.VarChar(255)
-  content    String   @db.Text
-  createdAt  DateTime @default(now())
-  isActive   Boolean  @default(false)
+  id        Int      @id @default(autoincrement())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  title     String   @db.VarChar(255)
+  slug      String   @db.VarChar(255)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(false)
+}
+
+model UserFollow {
+  id           Int      @id @default(autoincrement())
+  followerId   Int
+  followingId  Int
+  notification Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt()
+
+  follower  User @relation("Following", fields: [followerId], references: [id])
+  following User @relation("Followers", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
 }

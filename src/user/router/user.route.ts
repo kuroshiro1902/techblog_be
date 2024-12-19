@@ -13,10 +13,16 @@ const userRouter = Router();
 const meRouter = Router();
 meRouter.get('', UserController.getMe);
 meRouter.put('/update', UserController.updateMeExceptPassword);
-meRouter.put('/update-password', UserController.updatePassword)
+meRouter.put('/update-password', UserController.updatePassword);
 
-userRouter.use('/me', authMiddleware, meRouter)
-userRouter.get('/profile/:userId', UserController.getUserProfile)
+// Follow routes
+userRouter.post('/follow/:userId', authMiddleware, UserController.followUser);
+userRouter.put('/follow/notification/:userId', authMiddleware, UserController.updateFollowNotification);
+userRouter.get('/followers/:userId', UserController.getFollowers);
+userRouter.get('/following/:userId', UserController.getFollowing);
+
+userRouter.use('/me', authMiddleware, meRouter);
+userRouter.get('/profile/:userId', UserController.getUserProfile);
 userRouter.post('/search', UserController.searchUsers);
 userRouter.get('/:userId', UserController.getUserById);
 

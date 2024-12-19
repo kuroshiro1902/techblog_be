@@ -12,6 +12,10 @@ import { ERoleName, ROLES } from '../constants/role.constant';
 import { updateOneExceptPassword } from './mutations/updateOneExceptPassword.mutation';
 import { findUnique } from './queries/findUnique.query';
 import { updatePassword } from './mutations/updatePassword.mutation';
+import { followUser } from './mutations/followUser.mutation';
+import { updateFollowNotification } from './mutations/updateFollowNotification.mutation';
+import { findFollowers } from './queries/findFollowers.query';
+import { findFollowing } from './queries/findFollowing.query';
 
 export const UserService = {
   findUnique,
@@ -33,5 +37,8 @@ export const UserService = {
     return createdUser;
   },
   updatePassword,
-
+  followUser,
+  updateFollowNotification,
+  findFollowers,
+  findFollowing,
 };

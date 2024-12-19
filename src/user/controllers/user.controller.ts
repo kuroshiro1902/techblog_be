@@ -91,4 +91,48 @@ export const UserController = {
       return serverError(res, error);
     }
   },
+
+  async followUser(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const followingId = +req.params.userId;
+      const follow$ = req.query.follow as any;
+      const follow = await UserService.followUser(userId, followingId, follow$);
+      return res.json({ isSuccess: true, data: follow });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async updateFollowNotification(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const followingId = +req.params.userId;
+      const { notification } = req.body;
+      const follow = await UserService.updateFollowNotification(userId, followingId, notification);
+      return res.json({ isSuccess: true, data: follow });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async getFollowers(req: Request, res: Response) {
+    try {
+      const userId = +req.params.userId;
+      const followers = await UserService.findFollowers(userId);
+      return res.json({ isSuccess: true, data: followers });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async getFollowing(req: Request, res: Response) {
+    try {
+      const userId = +req.params.userId;
+      const following = await UserService.findFollowing(userId);
+      return res.json({ isSuccess: true, data: following });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
 };
