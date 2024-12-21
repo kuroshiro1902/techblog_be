@@ -8,8 +8,9 @@ export const findFollowing = async (userId?: number) => {
   const following = await DB.userFollow.findMany({
     where: { followerId: validatedUserId },
     include: {
-      following: {
-        select: USER_PUBLIC_FIELDS_SELECT,
+      following:
+      {
+        select: { id: true, name: true, avatarUrl: true },
       },
     },
   });

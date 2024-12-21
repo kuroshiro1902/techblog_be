@@ -7,7 +7,7 @@ import { TUserFindManyQuery } from '../services/queries/findMany.query';
 import { POST_PUBLIC_FIELDS, POST_PUBLIC_FIELDS_SELECT } from '@/post/validators/post.schema';
 
 export const UserController = {
-  async getUserById(req: Request<{ userId: string }>, res: Response) {
+  async getUserById(req: Request<{ userId: string }>, res: Response): Promise<any> {
     try {
       const _userId = userSchema.shape.id.parse(+req.params?.userId);
 
@@ -30,7 +30,10 @@ export const UserController = {
   async getUserProfile(req: Request, res: Response) {
     try {
       const userId = req.params.userId;
-      const user = await UserService.findUnique(+userId);
+      const user = await UserService.findUnique(+userId, {
+        ...USER_PUBLIC_FIELDS_SELECT,
+        followers: req.user?.id ? { where: { followerId: req.user.id } } : undefined,
+      });
       return res.json({ isSuccess: true, data: user });
     } catch (error) {
       return serverError(res, error);
@@ -96,7 +99,7 @@ export const UserController = {
     try {
       const userId = req.user?.id;
       const followingId = +req.params.userId;
-      const follow$ = req.query.follow as any;
+      const follow$ = req.body.follow;
       const follow = await UserService.followUser(userId, followingId, follow$);
       return res.json({ isSuccess: true, data: follow });
     } catch (error) {
@@ -131,6 +134,17 @@ export const UserController = {
       const userId = +req.params.userId;
       const following = await UserService.findFollowing(userId);
       return res.json({ isSuccess: true, data: following });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
+  async getUserFollow(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const followingId = +req.params.userId;
+      const follow = await UserService.findUserFollow(userId, followingId);
+      return res.json({ isSuccess: follow ? true : false, data: follow });
     } catch (error) {
       return serverError(res, error);
     }

@@ -14,6 +14,7 @@ const meRouter = Router();
 meRouter.get('', UserController.getMe);
 meRouter.put('/update', UserController.updateMeExceptPassword);
 meRouter.put('/update-password', UserController.updatePassword);
+meRouter.get('/follow/:userId', UserController.getUserFollow);
 
 // Follow routes
 userRouter.post('/follow/:userId', authMiddleware, UserController.followUser);

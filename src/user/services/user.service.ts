@@ -16,6 +16,7 @@ import { followUser } from './mutations/followUser.mutation';
 import { updateFollowNotification } from './mutations/updateFollowNotification.mutation';
 import { findFollowers } from './queries/findFollowers.query';
 import { findFollowing } from './queries/findFollowing.query';
+import { findUserFollow } from './queries/findUserFollow.query';
 
 export const UserService = {
   findUnique,
@@ -41,4 +42,5 @@ export const UserService = {
   updateFollowNotification,
   findFollowers,
   findFollowing,
+  findUserFollow,
 };
