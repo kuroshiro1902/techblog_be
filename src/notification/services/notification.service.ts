@@ -11,9 +11,10 @@ import { NotificationType, NotificationItemType, Notification, Prisma } from '@p
 import notificationServer from '../notification.server';
 import { PostService } from '@/post/services/post.service';
 import { ENotificationEvent } from '../constants/notification-event.const';
-import { TNewPostCommentNotification } from '../models/new-post-comment-notification.model';
+import { TNewPostCommentNotification, TNewPostNotification } from '../models/notification.model';
 import { EUserField, userSchema } from '@/user/validators/user.schema';
 import { z } from 'zod';
+import { NotificationSocketService } from '@/notification/services/notification-socket.service';
 
 type TMapFields = EPostField | ECommentField;
 // const mapFields: Record<NotificationItemType, Record<TMapFields, true>> = {
@@ -53,7 +54,7 @@ export const NotificationService = {
   async handleNewPostComment(input: TNewPostCommentNotification) {
     const { postId, user, comment } = input;
     // Lấy danh sách subscribers
-    const { followerIds, ...post } = await PostService.getFollowersWithNotification(postId);
+    const { followerIds, ...post } = await PostService.getPostFollowersWithNotification(postId);
 
     // Loại bỏ userId của người tạo comment khỏi danh sách followers
     const filteredFollowerIds = followerIds.filter((id) => id !== user.id);
@@ -83,6 +84,32 @@ export const NotificationService = {
     );
   },
 
+  async handleNewPost(input: TNewPostNotification, type: 'create' | 'update') {
+
+    const { post } = input;
+    console.log('Call handleNewPost', { post });
+    // Lấy danh sách người theo dõi của người đăng bài viết
+    const followers = await PostService.getUserFollowersWithNotification(post.author.id);
+    console.log('followers', { followers });
+
+    if (!followers.length) {
+      return;
+    }
+
+    // Tạo nội dung thông báo
+    const messageTitle = type === 'create' ? 'Bài viết mới' : 'Bài viết được cập nhật';
+    const messageContent = type === 'create' ? `<b>${post.author.name}</b> đã đăng bài viết mới: <b>${post.title}</b>` : `<b>${post.author.name}</b> đã cập nhật bài viết: <b>${post.title}</b>`;
+    // Tạo thông báo trong database
+    await this.createNotifications(followers.map(({ id }) => id), 'POST', 'post', post.id, messageTitle, messageContent);
+
+    // Chuẩn bị dữ liệu để emit
+    const notification = { messageTitle, messageContent, post, itemType: 'post', createdAt: post.createdAt };
+
+    // Gửi sự kiện qua socket
+    notificationServer
+      .to(followers.map(({ id }) => `${id}`))
+      .emit(ENotificationEvent.POST_NEW, notification);
+  },
 
   // Find notifications for a user
   async findUserNotifications(

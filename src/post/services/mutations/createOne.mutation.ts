@@ -3,6 +3,7 @@ import { createPostSchema, EPostField, POST_PUBLIC_FIELDS } from "@/post/validat
 import { EUserField, userSchema } from "@/user/validators/user.schema";
 import { createSlug } from "../helpers/create-slug.helper";
 import { z } from "zod";
+import { NotificationService } from "@/notification/services/notification.service";
 
 export const createOne = async (post: z.input<typeof createPostSchema>, authorId: number) => {
   const validatedPost = createPostSchema.parse(post);
@@ -12,7 +13,7 @@ export const createOne = async (post: z.input<typeof createPostSchema>, authorId
   const slug = createSlug(validatedPost[EPostField.title]);
   const title = validatedPost[EPostField.title].substring(0, 255);
 
-  return await DB.$transaction(async (tx) => {
+  const createdPost = await DB.$transaction(async (tx) => {
     // Query 1: Tạo post mới
     const createdPost = await tx.post.create({
       data: {
@@ -43,4 +44,11 @@ export const createOne = async (post: z.input<typeof createPostSchema>, authorId
 
     return createdPost;
   });
+
+  if (createdPost.isPublished) {
+    const { author, id, slug, title, createdAt } = createdPost;
+    NotificationService.handleNewPost({ post: { id, slug, title, createdAt, author: { id: author.id, name: author.name } } }, 'create');
+  }
+
+  return createdPost;
 };

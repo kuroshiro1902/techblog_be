@@ -8,3 +8,7 @@ export type TNewPostCommentNotification = {
   postId: number
   comment: Pick<Comment, 'content'>
 }
+
+export type TNewPostNotification = {
+  post: Pick<Post, 'id' | 'title' | 'slug' | 'createdAt'> & { author: Pick<User, 'id' | 'name'> }
+}

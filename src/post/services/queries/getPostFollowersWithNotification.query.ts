@@ -4,7 +4,7 @@ import { EPostField, postSchema } from "@/post/validators/post.schema";
 /**
  * Lấy ra những người dùng đang theo dõi bài viết và đăng kí nhận thông báo
  */
-export const getFollowersWithNotification = async (postId$: number) => {
+export const getPostFollowersWithNotification = async (postId$: number) => {
   // Xác thực và parse postId
   const postId = postSchema.shape[EPostField.id].parse(postId$);
 
