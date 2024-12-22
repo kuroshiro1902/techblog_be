@@ -1,5 +1,6 @@
 import { Elastic } from "@/database/database";
 import { syncPostToElasticSearchJob } from "./syncPostToElasticSearch.job"
+import { updateMissingEmbeddingsJob } from "./updateMissingEmbedding.job";
 
 
 export const JobServer = async () => {
@@ -7,4 +8,5 @@ export const JobServer = async () => {
     return;
   }
   syncPostToElasticSearchJob().catch(err => { });
+  // updateMissingEmbeddingsJob().catch(err => { });
 }

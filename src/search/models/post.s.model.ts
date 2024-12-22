@@ -20,5 +20,6 @@ export type TPost_S = {
   }[];
   [EPostField.createdAt]: Date;
   ratings: TRatingInfo;
+  embedding?: number[];
 };
 

@@ -81,6 +81,11 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 [] VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
 Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.
 
+[] Báo cáo
+- chức năng xem trang cá nhân user khác
+
+[] Sửa lại hết message các lỗi cho giống báo cáo.
+
 build docker image: docker build -t be_blog .
 
 chạy docker container: docker run -p 4537:4537 be_blog

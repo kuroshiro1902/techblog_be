@@ -8,23 +8,27 @@ import { getRandomValues } from './common/utils/getRandomValues.util';
 import { delay } from './common/utils/delay';
 import markdown from 'markdown-it'
 
+const idsToIgnore = [79888, 79904, 79793, 75413, 79879, 79902, 79898, 79477, 79875];
+const page = 9;
 (async () => {
   const md = new markdown()
-  const { data: res } = await axios.get('https://api.viblo.asia/posts');
-  const rawPosts: any[] = res.data;
+  const { data: res } = await axios.get('https://api.viblo.asia/posts?page=' + page);
+  const rawPosts: any[] = res.data.filter((p: any) => {
+    return !idsToIgnore.includes(p.id) && p.moderation !== 'pending'
+  });
   const userIds = (await DB.user.findMany()).map(u => u.id);
-  const posts: z.input<typeof createPostSchema>[] = rawPosts.slice(2).map((p: any) => {
+  const posts: z.input<typeof createPostSchema>[] = rawPosts.map((p: any) => {
     return {
       title: p.title,
       // description: p.contents_short,
       isPublished: true,
-      thumbnailUrl: p.thumbnail_url,
+      thumbnailUrl: p.thumbnail_url ?? null,
       // slug: string
-      content: md.render(p.contents)
+      content: md.render(p.contents),
       // thumbnailUrl?: string | null
       // isPublished?: boolean | null
-      // views?: number
-      // createdAt?: Date | string
+      views: p.views_count ?? 0,
+      createdAt: new Date(p.published_at)
       // updatedAt?: Date | string
       // currentVersion?: number
       // categories?: CategoryCreateNestedManyWithoutPostsInput

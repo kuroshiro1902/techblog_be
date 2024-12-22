@@ -124,8 +124,3 @@ async function setDefaultStatusPosts() {
 
 // prisma.userFavoritePost.findMany().then((d) => console.log({ d }, d[0].userId)
 // )
-
-prisma.userFollow.findMany().then((d) => {
-  console.log({ d });
-
-})
