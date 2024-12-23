@@ -5,6 +5,8 @@ import { z } from "zod";
 import { createCommentSchema } from "@/post/validators/comment.schema";
 import { COMMENT_SELECT } from "../constants/comment-select.const";
 import { NotificationService } from "@/notification/services/notification.service";
+import { TEXT_AI } from "@/openai/generative";
+import { removeHtml } from "@/common/utils/removeHtml.util";
 
 export const createComment = async (
   comment: z.input<typeof createCommentSchema>,
@@ -29,6 +31,14 @@ export const createComment = async (
     postId = parentComment.postId;
   } else {
     throw new Error('Bình luận không này không được chỉ định bài viết hoặc bình luận trả lời.');
+  }
+
+  const harmfulCheck = await TEXT_AI(removeHtml(validatedComment.content),
+    "Bạn là một trợ lý kiểm tra nội dung bình luận có phải là nội dung bạo lực, xúc phạm, hay không phù hợp không? Nếu có, hãy trả về 'true', ngược lại trả về 'false'.")
+
+  const isHarmful = harmfulCheck.includes('true')
+  if (isHarmful) {
+    throw new Error('Nội dung bình luận vi phạm quy định! Vui lòng kiểm tra lại.');
   }
 
   // Create comment

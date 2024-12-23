@@ -1,0 +1,9 @@
+# Giải thích công thức tính trending score:
+- Views Score (40%):
+- Like Ratio (30%):
+- Freshness (30%):
+
+# Với cách này:
+- User mới sẽ thấy bài viết trending
+- User có tương tác sẽ thấy bài phù hợp sở thích
+- Kết quả luôn mới và chất lượng

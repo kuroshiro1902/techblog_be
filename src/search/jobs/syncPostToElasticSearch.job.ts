@@ -35,7 +35,8 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
           author: {
             select: {
               id: true,
-              name: true
+              name: true,
+              avatarUrl: true
             }
           },
           thumbnailUrl: true,

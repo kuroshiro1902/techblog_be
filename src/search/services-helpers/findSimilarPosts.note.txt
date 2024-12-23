@@ -1,19 +1,59 @@
-1. Chuẩn hóa lượt xem
-// Sử dụng log10 để giảm khoảng cách giữa các bài có nhiều view
-// Ví dụ:
+# 1. Chuẩn hóa lượt xem
+Sử dụng log10 để giảm khoảng cách giữa các bài có nhiều view
+Ví dụ:
 views = 10 -> log10(11) ≈ 1.04 -> normalized = 0.21
 views = 100 -> log10(101) ≈ 2.00 -> normalized = 0.40
 views = 1000 -> log10(1001) ≈ 3.00 -> normalized = 0.60
 views = 10000 -> log10(10001) ≈ 4.00 -> normalized = 0.80
 
-2. Trọng số điểm
-// similarity (0-2) * 0.7 -> max 1.4
-// normalizedViews (0-1) * 0.3 * 2.0 -> max 0.6
-// Tổng điểm max = 2.0
+# 2. Trọng số điểm
+similarity (0-2) * 0.7 -> max 1.4
+normalizedViews (0-1) * 0.3 * 2.0 -> max 0.6
+Tổng điểm max = 2.0
 
-// Ví dụ:
-// Bài rất tương đồng (1.8) nhưng ít view (0.2):
+Ví dụ:
+Bài rất tương đồng (1.8) nhưng ít view (0.2):
 score = 1.8 * 0.7 + 0.2 * 0.3 * 2.0 = 1.38
 
-// Bài hơi tương đồng (1.4) và nhiều view (0.8):
+Bài hơi tương đồng (1.4) và nhiều view (0.8):
 score = 1.4 * 0.7 + 0.8 * 0.3 * 2.0 = 1.46
+
+# Cách tính điểm
+1. Cosine similarity (0-2)
+double similarity = cosineSimilarity(params.query_vector, 'embedding') + 1.0;
+
+Ví dụ:
+Hoàn toàn giống nhau:  1.0 + 1.0 = 2.0
+Hơi tương đồng:        0.5 + 1.0 = 1.5
+Không liên quan:       0.0 + 1.0 = 1.0
+Đối lập:              -1.0 + 1.0 = 0.0
+
+2. Chuẩn hóa lượt xem
+double normalizedViews = Math.log10(doc['views'].value + 1) / 5.0;
+if(normalizedViews > 1.0) normalizedViews = 1.0;
+
+Ví dụ:
+10 views:    log10(11)/5  = 0.21
+100 views:   log10(101)/5 = 0.40
+1000 views:  log10(1001)/5 = 0.60
+10000 views: log10(10001)/5 = 0.80
+
+3. Điểm tổng hợp
+return similarity * 0.7 + normalizedViews * 0.3 * 2.0;
+
+Ví dụ:
+Bài rất tương đồng (1.8) và nhiều view (0.8):
+= 1.8 * 0.7 + 0.8 * 0.3 * 2.0
+= 1.26 + 0.48
+= 1.74 (điểm cao)
+
+Bài hơi tương đồng (1.4) và ít view (0.2):
+= 1.4 * 0.7 + 0.2 * 0.3 * 2.0
+= 0.98 + 0.12
+= 1.10 (điểm trung bình)
+
+Ý nghĩa:
+70% điểm dựa vào nội dung tương đồng
+30% điểm dựa vào lượt xem
+Sử dụng log10 để giảm khoảng cách giữa các bài có nhiều view
+Giới hạn normalizedViews ≤ 1.0 để tránh điểm quá cao

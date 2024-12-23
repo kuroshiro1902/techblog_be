@@ -1,5 +1,5 @@
 import { ENVIRONMENT } from "@/common/environments/environment";
-import { Elastic } from "@/database/database";
+import { DB, Elastic } from "@/database/database";
 import { createEmbedding } from "@/openai/service-helpers/createEmbedding";
 import { Logger } from "@/common/utils/logger.util";
 import { summaryContent } from "@/openai/service-helpers/summaryContent";

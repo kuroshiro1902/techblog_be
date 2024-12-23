@@ -10,6 +10,7 @@ import { TSearchPostQuery } from '../services/queries/search.query';
 import { parseNumeric } from '@/common/utils/parseNumeric.util';
 import { CommentService } from '../services/comment.service';
 import { ERatingScore } from '../constants/rating-score.const';
+import { SearchService } from '@/search/search.service';
 
 export const PostController = {
   async getPosts(req: Request<{}, {}, {
@@ -426,6 +427,24 @@ export const PostController = {
     } catch (error) {
       return serverError(res, error);
 
+    }
+  },
+
+  async getRecommendedPosts(req: Request, res: Response) {
+    try {
+      const userId = req.user?.[EUserField.id];
+      const limit = +(req.query.pageSize ?? 4);
+
+      if (!userId) return res.json({ isSuccess: true, data: [] });
+
+      const posts = await SearchService.getRecommendedPosts(userId, limit);
+
+      return res.json({
+        isSuccess: true,
+        data: posts
+      });
+    } catch (error) {
+      return serverError(res, error);
     }
   }
 };

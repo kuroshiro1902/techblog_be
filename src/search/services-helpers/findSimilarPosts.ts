@@ -9,7 +9,8 @@ export const findSimilarPosts = async (postId: number, limit: number = 5) => {
     // Lấy embedding của bài viết gốc
     const sourcePost = await Elastic.get<TPost_S>({
       index: ENVIRONMENT.ELASTIC_POST_INDEX,
-      id: postId.toString()
+      id: postId.toString(),
+      _source: ['embedding']
     });
 
     if (!sourcePost.found || !sourcePost._source?.embedding) {
@@ -25,11 +26,11 @@ export const findSimilarPosts = async (postId: number, limit: number = 5) => {
           script_score: {
             query: {
               bool: {
+                must: [
+                  { term: { isPublished: true } }
+                ],
                 must_not: [
                   { term: { id: postId } } // Loại bỏ bài viết gốc
-                ],
-                filter: [
-                  { term: { isPublished: true } } // Chỉ lấy bài đã publish
                 ]
               }
             },
@@ -68,15 +69,15 @@ export const findSimilarPosts = async (postId: number, limit: number = 5) => {
       description: hit._source?.description,
       slug: hit._source?.slug,
       // score: hit._score,
-      // score: {
-      //   total: hit._score,
-      //   // Tính lại các thành phần điểm để hiển thị
-      //   similarity: ((hit?._score ?? 0 * 10) / 7).toFixed(2),
-      //   popularity: (hit?._source?.views ?? 0 > 0 
-      //     ? (Math.log10(hit?._source?.views ?? 0 + 1) / 5.0).toFixed(2) 
-      //     : 0
-      //   )
-      // },
+      score: {
+        total: hit._score,
+        // Tính lại các thành phần điểm để hiển thị
+        similarity: ((hit?._score ?? 0 * 10) / 7),
+        popularity: (hit?._source?.views ?? 0 > 0
+          ? (Math.log10(hit?._source?.views ?? 0 + 1) / 5.0)
+          : 0
+        )
+      },
       views: hit._source?.views,
       thumbnailUrl: hit._source?.thumbnailUrl,
       author: hit._source?.author,

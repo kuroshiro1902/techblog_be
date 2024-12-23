@@ -1,7 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { fa, faker } from '@faker-js/faker';
 import slugify from 'slugify';
-import axios from 'axios';
 const prisma = new PrismaClient();
 function getRandomThumbnailUrl() {
   // Sinh ngẫu nhiên giá trị width từ 300 đến 600
@@ -86,9 +85,9 @@ async function seedCategories() {
   await prisma.category.create({
     data: {
       name: 'Nodejs',
-      parents: {
-        connect: { id: backend.id }, // Kết nối với Backend
-      },
+      // parents: {
+      //   connect: { id: backend.id }, // Kết nối với Backend
+      // },
     },
   });
 

@@ -8,7 +8,7 @@ export const serverError = (res: Response, message?: string | any) => {
         ? message?.issues?.[0]?.message || message?.message
         : message.trim();
     }
-    return 'Internal Server Error! Try again later.';
+    return 'Có lỗi xảy ra! Vui lòng thử lại sau.';
   })();
   return res.status(STATUS_CODE.SERVER_ERROR).json({ isSuccess: false, message: _message });
 };

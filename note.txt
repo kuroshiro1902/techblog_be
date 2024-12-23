@@ -73,6 +73,8 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 
 [] (optional) Cài đặt hệ thống -> docker, elasticsearch (maybe), postgresql (maybe).
 
+[] Hiển thị tóm tắt của mỗi bài viết (description). (api lấy description từ elasticsearch)
+
 [done] Theo dõi và nhận bài viết user
 [done] - Thêm nút theo dõi user vào trang profile.
 [done] - Trang danh sách user theo dõi -> Khi user này đăng bài mới -> emit cho các user theo dõi.

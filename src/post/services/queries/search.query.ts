@@ -104,9 +104,10 @@ export const searchPosts = async (query?: TSearchPostQuery): Promise<{ data: TPo
       }
     },
     sort: [
-      { _score: {order:  'desc'}  },
+      { _score: { order: 'desc' } },
       { [orderCondition.field]: orderCondition.order.toLowerCase() }
     ],
+    _source: fields,
     from: skip,
     size: pageSize
   });
