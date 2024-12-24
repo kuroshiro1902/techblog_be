@@ -54,47 +54,22 @@ const AuthController = {
 
   async signup(req: Request, res: Response) {
     try {
-      const { data, error } = userSchema
-        .omit({
-          [EUserField.id]: true,
-          [EUserField.createdAt]: true,
-          [EUserField.roles]: true,
-          [EUserField.updatedAt]: true,
-        })
-        .safeParse(req.body);
-      if (error) {
+      const savedUser = await AuthService.signup(req.body as any);
+      return res.status(STATUS_CODE.CREATED).json({
+        isSuccess: true,
+        data: savedUser
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Tên đăng nhập đã tồn tại!') {
+          return res
+            .status(STATUS_CODE.CONFLICT)
+            .json({ isSuccess: false, message: error.message });
+        }
         return res
           .status(STATUS_CODE.INVALID_INPUT)
           .json({ isSuccess: false, message: error.message });
       }
-
-      const { name, username, password, email, dob, avatarUrl, description } = data;
-
-      const existedUser = await UserService.findOne({
-        input: { username },
-      });
-      if (existedUser) {
-        return res
-          .status(STATUS_CODE.CONFLICT)
-          .json({ isSuccess: false, message: 'Tên đăng nhập đã tồn tại!' });
-      }
-
-      const hashedPassword = AuthService.hashPassword(password);
-
-      const user = {
-        name,
-        username,
-        description,
-        password: hashedPassword,
-        email,
-        dob,
-        avatarUrl,
-      };
-
-      const savedUser = await UserService.createUser(user);
-
-      return res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: savedUser });
-    } catch (error) {
       return serverError(res, error);
     }
   },

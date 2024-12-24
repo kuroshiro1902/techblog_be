@@ -85,7 +85,9 @@ export const createPostSchema = postSchema.pick({
   [EPostField.isPublished]: true,
   [EPostField.thumbnailUrl]: true,
   [EPostField.categories]: true,
-  [EPostField.description]: true
+  [EPostField.description]: true,
+  // [EPostField.createdAt]: true, // test
+  // [EPostField.views]: true // test
 }).strict();
 
 export const updatePostSchema = createPostSchema.merge(postSchema.pick({ [EPostField.views]: true })).partial();

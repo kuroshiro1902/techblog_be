@@ -10,7 +10,7 @@
     "test": "ts-node-dev --transpile-only -r tsconfig-paths/register src/test.test.ts"
   },
   "prisma": {
-    "seed": "ts-node prisma\\seed.ts"
+    "seed": "ts-node-dev --transpile-only -r tsconfig-paths/register prisma\\seed.ts"
   },
   "keywords": [],
   "author": "",

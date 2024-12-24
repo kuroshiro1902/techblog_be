@@ -88,6 +88,13 @@ Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội du
 
 [] Sửa lại hết message các lỗi cho giống báo cáo.
 
+[] Kịch bản: 
+- User A thích những chủ đề X (dùng account của user A đi tương tác với những bài thuộc chủ đề X).
+- User B thích những chủ đề Y ...
+
+trình bày báo cáo: note findSimilarPosts và getRecommendPosts.
+trình bày thêm rate limit và model trong openai (optional).
+
 build docker image: docker build -t be_blog .
 
 chạy docker container: docker run -p 4537:4537 be_blog

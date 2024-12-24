@@ -6,6 +6,8 @@ import { z } from "zod";
 import { TEXT_AI } from "@/openai/generative";
 import { removeHtml } from "@/common/utils/removeHtml.util";
 import { commentHarmfulCheckInstruction } from "../constants/harmfulCheckInstruction.const";
+// import { OpenAIService } from "@/openai/openai.service";
+// import { Logger } from "@/common/utils/logger.util";
 
 export const updateComment = async (
   commentId: number,
@@ -42,6 +44,18 @@ export const updateComment = async (
     data: validatedData,
     select: COMMENT_SELECT
   });
+
+  // // Phân tích sentiment bất đồng bộ
+  // OpenAIService.analyzeCommentSentiment(validatedData.content)
+  //   .then(async (sentiment) => {
+  //     await DB.comment.update({
+  //       where: { id: validatedCommentId },
+  //       data: { impScore: sentiment }
+  //     });
+  //   })
+  //   .catch(error => {
+  //     Logger.error(`Failed to analyze sentiment for updated comment ${validatedCommentId}:`, error);
+  //   });
 
   return updatedComment;
 }; 

@@ -7,6 +7,7 @@ import { COMMENT_SELECT } from "../constants/comment-select.const";
 import { NotificationService } from "@/notification/services/notification.service";
 import { TEXT_AI } from "@/openai/generative";
 import { removeHtml } from "@/common/utils/removeHtml.util";
+// import { Logger } from "@/common/utils/logger.util";
 
 export const createComment = async (
   comment: z.input<typeof createCommentSchema>,
@@ -59,6 +60,18 @@ export const createComment = async (
     },
     select: COMMENT_SELECT
   });
+
+  // Phân tích sentiment bất đồng bộ
+  // OpenAIService.analyzeCommentSentiment(validatedComment.content)
+  //   .then(async (sentiment) => {
+  //     await DB.comment.update({
+  //       where: { id: createdComment.id },
+  //       data: { impScore: sentiment }
+  //     });
+  //   })
+  //   .catch(error => {
+  //     Logger.error(`Failed to analyze sentiment for comment ${createdComment.id}:`, error);
+  //   });
 
   NotificationService.handleNewPostComment({
     postId,

@@ -102,6 +102,7 @@ model Comment {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt()
   replies         Comment[]       @relation("CommentReplies")
+  impScore        Int? // Điểm đánh giá sắc thái ngầm
   post            Post            @relation(fields: [postId], references: [id])
   userId          Int
   user            User            @relation(fields: [userId], references: [id])

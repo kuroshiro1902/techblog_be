@@ -1,7 +1,11 @@
+import dotenv from 'dotenv/config';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { fa, faker } from '@faker-js/faker';
 import slugify from 'slugify';
+import { AuthService } from '../src/user/services/auth.service';
+
 const prisma = new PrismaClient();
+
 function getRandomThumbnailUrl() {
   // Sinh ngẫu nhiên giá trị width từ 300 đến 600
   const width = Math.floor(Math.random() * (600 - 300 + 1)) + 300;
@@ -20,6 +24,7 @@ function getRandomThumbnailUrl() {
 
   return thumbnailUrl;
 }
+
 async function seedPosts() {
   const authors = [1, 2, 3, 4];
 
@@ -60,12 +65,10 @@ async function seedPosts() {
   console.log('Seeded 100 posts successfully');
 }
 
-// seedPosts()
-//   .catch((e) => console.error(e))
-//   .finally(async () => {
-//     await prisma.$disconnect();
-//   });
-
+const seedRoles = async () => {
+  const roles = await prisma.role.createMany({ data: [{ name: 'user' }, { name: 'admin' }] });
+  console.log(roles);
+}
 
 async function seedCategories() {
   // Tạo danh mục Frontend và Backend
@@ -123,3 +126,52 @@ async function setDefaultStatusPosts() {
 
 // prisma.userFavoritePost.findMany().then((d) => console.log({ d }, d[0].userId)
 // )
+
+async function seedUsers() {
+  // Danh sách họ và tên đệm phổ biến
+  const lastNames = ['Trần', 'Lê', 'Phạm', 'Nguyễn', 'Hoàng', 'Huỳnh', 'Phan', 'Vũ', 'Võ', 'Đặng'];
+  const middleNames = ['Vũ', 'Đức', 'Minh', 'Linh', 'Quân', 'Dương', 'Công', 'Quang', 'Thu', 'Thanh'];
+
+  await AuthService.signup({
+    name: 'Bùi Thanh Sơn',
+    username: `kuroshiro1902`,
+    password: '123456',
+    email: `kuroshiro1902@gmail.com`,
+    description: faker.person.bio(),
+  } as any);
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  try {
+    for (let i = 0; i < 10; i++) {
+      const firstName = faker.person.firstName();
+      const middleName = middleNames[i];
+      const lastName = lastNames[i];
+      const fullName = `${lastName} ${middleName} ${firstName}`;
+
+      await AuthService.signup({
+        name: fullName,
+        username: `username${i + 1}`,
+        password: '123456',
+        email: `user${i + 1}@example.com`,
+        avatarUrl: faker.image.avatar(),
+        description: faker.person.bio(),
+      } as any);
+      // delay 0.5s
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log(`Created user: ${fullName} (username${i + 1})`);
+    }
+
+    console.log('Seeded 10 users successfully');
+  } catch (error) {
+    console.error('Error seeding users:', error);
+  }
+}
+
+// Chạy seed
+
+seedUsers()
+  .catch((e) => console.error(e))
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

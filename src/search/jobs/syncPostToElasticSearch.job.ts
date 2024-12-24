@@ -4,11 +4,12 @@ import { PostStatus, Prisma } from "@prisma/client";
 import schedule from "node-schedule";
 import { TPost_S } from "../models/post.s.model";
 import { Logger } from "../../common/utils/logger.util";
+import { removeHtml } from "@/common/utils/removeHtml.util";
 
 
 const condition: Prisma.PostWhereInput = { PostLog: { some: { OR: [{ status: "NOT_SYNCED" }, { status: "NEED_SYNC" }] } } };
 const batchSize = 100;
-const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
+export const syncPostToElasticSearchByBatch = async (size = batchSize): Promise<{ count: number }> => {
   if (!Elastic) {
     console.error('[WARN] Elastic is not available, post cannot be synced to ElasticSearch!!!');
     return { count: 0 };
@@ -23,7 +24,7 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
       // Lấy các bài viết cần đồng bộ
       const _postsToSync = await tx.post.findMany({
         where: condition,
-        take: batchSize,
+        take: size,
         select: {
           id: true,
           title: true,
@@ -67,7 +68,7 @@ const syncPostToElasticSearchByBatch = async (): Promise<{ count: number }> => {
         return {
           id: post.id,
           title: post.title,
-          content: post.content,
+          content: removeHtml(post.content),
           // description: post.description ?? '',
           slug: post.slug,
           thumbnailUrl: post.thumbnailUrl ?? '',
