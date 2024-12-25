@@ -6,6 +6,7 @@ import { z } from "zod";
 import { TEXT_AI } from "@/openai/generative";
 import { removeHtml } from "@/common/utils/removeHtml.util";
 import { commentHarmfulCheckInstruction } from "../constants/harmfulCheckInstruction.const";
+import { OpenAIService } from "@/openai/openai.service";
 // import { OpenAIService } from "@/openai/openai.service";
 // import { Logger } from "@/common/utils/logger.util";
 
@@ -31,31 +32,18 @@ export const updateComment = async (
     throw new Error('Comment không tồn tại hoặc bạn không có quyền chỉnh sửa.');
   }
 
-  const harmfulCheck = await TEXT_AI(removeHtml(validatedData.content), commentHarmfulCheckInstruction);
-
-  const isHarmful = harmfulCheck.includes('true')
-  if (isHarmful) {
-    throw new Error('Nội dung bình luận vi phạm quy định! Vui lòng kiểm tra lại.');
-  }
+  // Kiểm tra nội dung bình luận có vi phạm quy định hay không và trả về sắc thái bình luận
+  const impScore = await OpenAIService.analyzeCommentSentiment(validatedData.content);
 
   // Update comment
   const updatedComment = await DB.comment.update({
     where: { id: validatedCommentId },
-    data: validatedData,
+    data: {
+      impScore: isNaN(+impScore) ? null : +impScore,
+      content: validatedData.content,
+    },
     select: COMMENT_SELECT
   });
-
-  // // Phân tích sentiment bất đồng bộ
-  // OpenAIService.analyzeCommentSentiment(validatedData.content)
-  //   .then(async (sentiment) => {
-  //     await DB.comment.update({
-  //       where: { id: validatedCommentId },
-  //       data: { impScore: sentiment }
-  //     });
-  //   })
-  //   .catch(error => {
-  //     Logger.error(`Failed to analyze sentiment for updated comment ${validatedCommentId}:`, error);
-  //   });
 
   return updatedComment;
 }; 

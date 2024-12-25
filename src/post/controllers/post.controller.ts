@@ -174,6 +174,33 @@ export const PostController = {
     }
   },
 
+  async getAllComments(req: Request<unknown, unknown, {
+    pageIndex?: string,
+    pageSize?: string,
+    orderBy?: string
+  }>, res: Response) {
+    try {
+      const { pageIndex, pageSize } = parseNumeric(req.query, ['pageIndex', 'pageSize']);
+      const [field, order] = (req.query.orderBy as string || '').split('-');
+
+      const comments = await CommentService.getAllComments({
+        pageIndex,
+        pageSize,
+        orderBy: {
+          field: field || 'createdAt' as any,
+          order: order || 'desc' as any
+        }
+      });
+
+      return res.json({
+        isSuccess: true,
+        data: comments
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+
   // load comments
   async loadComments(req: Request<unknown, unknown, {
     postId?: string,

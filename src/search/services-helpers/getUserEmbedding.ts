@@ -3,7 +3,7 @@ import { Logger } from "@/common/utils/logger.util";
 import { ENVIRONMENT } from "@/common/environments/environment";
 import { ERatingScore } from "@/post/constants/rating-score.const";
 
-export const createUserEmbedding = async (userId: number) => {
+export const getUserEmbedding = async (userId: number) => {
   if (!Elastic) return [] as number[];
   try {
     // 1. Thu thập hành vi người dùng

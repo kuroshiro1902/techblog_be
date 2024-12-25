@@ -23,6 +23,7 @@ postRouter.get('/recommended', userMiddleware, PostController.getRecommendedPost
 postRouter.get('/own-ratings', authMiddleware, PostController.getUserRatings);
 postRouter.get('/own-comments', authMiddleware, PostController.getUserComments);
 
+postRouter.get('/all-comments', publishedPost, PostController.getAllComments);
 postRouter.post('/comment/create', authMiddleware, PostController.createComment);
 postRouter.post('/comment/rating', authMiddleware, PostController.ratingComment);
 postRouter.put('/comment/update', authMiddleware, PostController.updateComment);

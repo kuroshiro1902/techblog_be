@@ -1,6 +1,6 @@
 import { DB, Elastic } from "@/database/database";
 import { Logger } from "@/common/utils/logger.util";
-import { createUserEmbedding } from "./createUserEmbedding";
+import { getUserEmbedding } from "./getUserEmbedding";
 import { ENVIRONMENT } from "@/common/environments/environment";
 import { TPost_S } from "../models/post.s.model";
 
@@ -12,7 +12,7 @@ export const getRecommendedPosts = async (
 
   try {
     // 1. Lấy hoặc tạo user embedding
-    const userEmbedding = await createUserEmbedding(userId);
+    const userEmbedding = await getUserEmbedding(userId);
 
     // 2. Tìm bài viết dựa trên embedding hoặc trending
     const result = await Elastic.search<TPost_S>({

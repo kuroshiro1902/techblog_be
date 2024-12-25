@@ -168,10 +168,4 @@ async function seedUsers() {
   }
 }
 
-// Chạy seed
-
-seedUsers()
-  .catch((e) => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+seedCategories()

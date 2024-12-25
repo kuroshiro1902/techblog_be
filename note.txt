@@ -63,13 +63,13 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 - [] Thông báo reply comment
 - [done] Trang danh sách thông báo
 
-[] Gợi ý
+[done] Gợi ý
 - Tạo một rating với score = 0 thể hiện người dùng đã xem bài viết.
 - cài đặt thuật toán (hàm gợi ý bài viết - chatgpt)
 
 [] (optional) Lịch sử xem bài viết của người dùng (rating)
 
-[] thêm cột implicit rating để lưu điểm đánh giá ngầm của một user, đánh giá này sẽ được tính bằng sắc thái comment của user (user comment -> phân tích sắc thái -> điểm (ngầm - implicit) -> lưu db, để nếu user không đánh giá thì lấy điểm này). 
+[done] thêm cột implicit rating để lưu điểm đánh giá ngầm của một user, đánh giá này sẽ được tính bằng sắc thái comment của user (user comment -> phân tích sắc thái -> điểm (ngầm - implicit) -> lưu db, để nếu user không đánh giá thì lấy điểm này). 
 
 [] (optional) Cài đặt hệ thống -> docker, elasticsearch (maybe), postgresql (maybe).
 
@@ -83,7 +83,7 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 [] VisualParadigm: usecase diagram: bổ sung chức năng xem trước bài viết, yêu thích bài viết. Đổi tên thích/không thích -> đánh giá.
 Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội dung comment, xem có chứa từ ngữ thù địch nào không mới cho post.
 
-[] Báo cáo
+[done] Báo cáo
 - chức năng xem trang cá nhân user khác
 
 [] Sửa lại hết message các lỗi cho giống báo cáo.
@@ -91,6 +91,14 @@ Phân tích sắc cmt -> đánh tráo khái niệm :) -> Kiểm duyệt nội du
 [] Kịch bản: 
 - User A thích những chủ đề X (dùng account của user A đi tương tác với những bài thuộc chủ đề X).
 - User B thích những chủ đề Y ...
+
+[] Kịch bản: tìm kiếm mờ
+Search "prod"
+-> sẽ ra 2 bài proc, pod ở tiêu đề.
+-> Bài thứ 3 tiêu đề không có từ nào tương đương, nhưng trong nội dung có từ pod tương đương
+
+[] Tại sao lại chỉ sử dụng những thông số như bài viết người dùng đã yêu thích, bài viết người dùng đã comment tích cực mà không dùng những bài viết người dùng dislike hay comment tiêu cực để đánh giá
+-> Nói một chút về insight, có thể đúng có thể sai vì là cảm quan cá nhân: Một khi user đã vào đọc bài viết thì họ đã phải có hứng thú với chủ đề đó rồi, hoặc ít nhất là họ chưa hứng thú mà chỉ là họ nhìn thấy một chủ đề mới lạ và họ vào xem thử, chứ không có ai không thích một chủ đề vd như ko thích backend mà lại vào các bài viết về backend chỉ để dislike hay comment tiêu cực được!
 
 trình bày báo cáo: note findSimilarPosts và getRecommendPosts.
 trình bày thêm rate limit và model trong openai (optional).

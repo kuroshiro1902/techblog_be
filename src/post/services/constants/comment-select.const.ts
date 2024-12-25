@@ -9,12 +9,13 @@ export const COMMENT_SELECT: Prisma.CommentSelect = {
   parentCommentId: true,
   postId: true,
   user: { select: { id: true, name: true, avatarUrl: true, } },
+  impScore: true,
   // _count: {
   //   select: {
   //     replies: true,
   //   }
   // },
-  
+
   commentRatings: {
     select: {
       score: true,

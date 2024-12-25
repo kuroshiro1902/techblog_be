@@ -7,6 +7,7 @@ import { COMMENT_SELECT } from "../constants/comment-select.const";
 import { NotificationService } from "@/notification/services/notification.service";
 import { TEXT_AI } from "@/openai/generative";
 import { removeHtml } from "@/common/utils/removeHtml.util";
+import { OpenAIService } from "@/openai/openai.service";
 // import { Logger } from "@/common/utils/logger.util";
 
 export const createComment = async (
@@ -34,17 +35,13 @@ export const createComment = async (
     throw new Error('Bình luận không này không được chỉ định bài viết hoặc bình luận trả lời.');
   }
 
-  const harmfulCheck = await TEXT_AI(removeHtml(validatedComment.content),
-    "Bạn là một trợ lý kiểm tra nội dung bình luận có phải là nội dung bạo lực, xúc phạm, hay không phù hợp không? Nếu có, hãy trả về 'true', ngược lại trả về 'false'.")
-
-  const isHarmful = harmfulCheck.includes('true')
-  if (isHarmful) {
-    throw new Error('Nội dung bình luận vi phạm quy định! Vui lòng kiểm tra lại.');
-  }
+  // Kiểm tra nội dung bình luận có vi phạm quy định hay không và trả về sắc thái bình luận
+  const impScore = await OpenAIService.analyzeCommentSentiment(validatedComment.content);
 
   // Create comment
   const createdComment = await DB.comment.create({
     data: {
+      impScore: isNaN(+impScore) ? null : +impScore,
       content: validatedComment.content,
       post: {
         connect: { id: postId }
@@ -60,18 +57,6 @@ export const createComment = async (
     },
     select: COMMENT_SELECT
   });
-
-  // Phân tích sentiment bất đồng bộ
-  // OpenAIService.analyzeCommentSentiment(validatedComment.content)
-  //   .then(async (sentiment) => {
-  //     await DB.comment.update({
-  //       where: { id: createdComment.id },
-  //       data: { impScore: sentiment }
-  //     });
-  //   })
-  //   .catch(error => {
-  //     Logger.error(`Failed to analyze sentiment for comment ${createdComment.id}:`, error);
-  //   });
 
   NotificationService.handleNewPostComment({
     postId,
