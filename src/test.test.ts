@@ -8,9 +8,12 @@ import { AddressInfo } from 'net';
 import { updateMissingEmbeddingsByBatch, updateMissingEmbeddingsJob } from './search/jobs/updateMissingEmbedding.job';
 import { findSimilarPosts } from './search/services-helpers/findSimilarPosts';
 import { syncPostToElasticSearchByBatch, syncPostToElasticSearchJob } from './search/jobs/syncPostToElasticSearch.job';
+import { delay } from './common/utils/delay';
 
 // syncPostToElasticSearchByBatch(100)
 
-updateMissingEmbeddingsByBatch(5).then(res => {
-  console.log(res)
-})
+(async () => {
+  console.log('RUN')
+  const count = await updateMissingEmbeddingsByBatch(5).then(res => res.count)
+  console.log({ count });
+})()

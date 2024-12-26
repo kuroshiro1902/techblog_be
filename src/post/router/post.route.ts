@@ -19,7 +19,7 @@ postRouter.post('/restore-revision', authMiddleware, PostController.restoreRevis
 postRouter.get('/', publishedPost, PostController.getPosts);
 
 postRouter.get('/recommended', userMiddleware, PostController.getRecommendedPosts);
-
+postRouter.get('/description/:postId', PostController.getPostDescription);
 postRouter.get('/own-ratings', authMiddleware, PostController.getUserRatings);
 postRouter.get('/own-comments', authMiddleware, PostController.getUserComments);
 

@@ -33,14 +33,15 @@ export const updateMissingEmbeddingsByBatch = async (size = batchSize): Promise<
             minimum_should_match: 1
           }
         },
-        _source: ["id", "content"],
+        _source: ["id", "content", "description"],
         size
       }
     });
 
     const postsToUpdate = result.hits.hits.map(hit => ({
       id: +hit._id!,
-      content: hit._source?.content ?? ""
+      content: hit._source?.content ?? "",
+      description: hit._source?.description
     }));
 
     if (postsToUpdate.length <= 0) {

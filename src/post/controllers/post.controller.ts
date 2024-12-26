@@ -462,14 +462,21 @@ export const PostController = {
       const userId = req.user?.[EUserField.id];
       const limit = +(req.query.pageSize ?? 4);
 
-      if (!userId) return res.json({ isSuccess: true, data: [] });
-
       const posts = await SearchService.getRecommendedPosts(userId, limit);
 
       return res.json({
         isSuccess: true,
         data: posts
       });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
+  async getPostDescription(req: Request, res: Response) {
+    try {
+      const postId = +req.params.postId;
+      const description = await PostService.getPostDescription(postId);
+      return res.json({ isSuccess: true, data: description });
     } catch (error) {
       return serverError(res, error);
     }

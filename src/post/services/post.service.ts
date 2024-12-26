@@ -16,6 +16,7 @@ import { getPostFollowersWithNotification } from './queries/getPostFollowersWith
 import { isFavoritePost } from './queries/isFavoritePost.query';
 import { changePostNotification } from './mutations/changePostNotification.mutation';
 import { getUserFollowersWithNotification } from './queries/getUserFollowersWithNotification.query';
+import { getPostDescription } from './queries/getPostDescription.query';
 
 export const PostService = {
   searchPosts,
@@ -35,5 +36,6 @@ export const PostService = {
   deleteFavoritePost,
   getPostFollowersWithNotification,
   getUserFollowersWithNotification,
-  changePostNotification
+  changePostNotification,
+  getPostDescription
 };

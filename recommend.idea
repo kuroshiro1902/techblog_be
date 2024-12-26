@@ -1,0 +1,162 @@
+Có một số cách để cải tiến logic gợi ý bài viết cá nhân hóa:
+1. Cải tiến User Embedding:
+- Thêm trọng số cho các hành động (weight-based):
+  - Like: 1.0
+  - Save: 0.8
+  - Comment tích cực: 0.6
+  - Comment tiêu cực: -0.3
+  - View time > 5 phút: 0.4
+  - Bounce (rời đi ngay): -0.2
+2. Time-based Decay:
+  - Giảm dần ảnh hưởng của các tương tác cũ
+  - Ưu tiên hành vi gần đây hơn
+  - Công thức: weight exp(-decay_rate days_ago)
+
+
+//////////////////
+* Điểm tích cực:
+  - Đa dạng dữ liệu:
+    - Kết hợp nhiều loại tương tác (like, save, comment, view)
+    - Phản ánh được mức độ quan tâm qua trọng số
+  + Dễ thêm loại tương tác mới
+  + Điều chỉnh trọng số linh hoạt
+  + Error handling tốt
+  - Có time decay để ưu tiên sở thích gần đây
+  - Xử lý sentiment:
+    - Phân biệt comments tích cực/tiêu cực
+  - Điều chỉnh trọng số theo impScore
+    - Phản ánh được phản ứng thực của user
+  - Tính thời gian:
+    - Giảm ảnh hưởng của dữ liệu cũ
+    - Cập nhật theo sở thích mới của user
+    - Tránh recommend nội dung không còn phù hợp
+
+
+* Các trường hợp nhiễu/hạn chế:
+  - Xem nhưng không thích -> vẫn tăng trọng số
+  - Xem do click nhầm -> tăng trọng số không đáng có
+  - Bounce rate cao (xem rất nhanh rồi thoát) -> không phản ánh đúng sở thích
+  - cold start 
+    - User mới (chưa có tương tác)
+    - Post mới (chưa có embedding)
+    - Categories mới (chưa có affinity)
+  - Bias trong thuật toán
+    - Echo chamber (chỉ recommend nội dung tương tự)
+    - Popularity bias (ưu tiên bài hot)
+    - Recency bias (quá phụ thuộc time decay)
+    - Lost serendipity (mất cơ hội khám phá nội dung mới)
+
+Tuy nhiên thuật toán vẫn đủ để recommend được những bài viết phù hợp với sở thích của user.
+
+
+////////////////////
+Luồng
+1. THU THẬP HÀNH VI NGƯỜI DÙNG:
+{
+  // Bước 1: Query database lấy tất cả tương tác của user
+  const userBehavior = await DB.user.findUnique({
+    where: { id: userId },
+    select: {
+      ratings: { ... },      // Lấy likes và views
+      userFavoritePosts: { ... }, // Lấy saves
+      comments: { ... }      // Lấy comments và impScore
+    }
+  });
+}
+
+2. TÍNH TRỌNG SỐ CHO MỖI BÀI VIẾT:
+{
+  // Định nghĩa trọng số cho mỗi hành động
+  const ACTION_WEIGHTS = {
+    LIKE: 1.0,    // Trọng số cao nhất - signal mạnh nhất
+    FAVORITE: 0.8, // Save để đọc lại - quan tâm cao
+    COMMENT_POSITIVE: 0.6,  // Comment tích cực
+    COMMENT_NEUTRAL: 0.3,   // Có tương tác nhưng không rõ thái độ
+    COMMENT_NEGATIVE: -0.2, // Phản hồi tiêu cực
+    VIEW: 0.2     // Chỉ xem - signal yếu nhất
+  }
+
+  // Time decay: giảm ảnh hưởng theo thời gian
+  const timeDecay = Math.exp(-DECAY_RATE * daysPassed);
+  // Ví dụ: sau 7 ngày, ảnh hưởng giảm ~50%
+  
+  // Tổng hợp trọng số cho mỗi bài viết
+  postWeights.set(postId, {
+    weight: existingWeight + (actionWeight * timeDecay),
+    timestamp: interaction.createdAt
+  });
+}
+
+3. LẤY EMBEDDINGS TỪ ELASTICSEARCH:
+{
+  // Query Elasticsearch lấy vectors của các bài viết
+  const { hits } = await Elastic.search({
+    index: ENVIRONMENT.ELASTIC_POST_INDEX,
+    body: {
+      query: {
+        terms: { id: Array.from(postWeights.keys()) }
+      },
+      _source: ["embedding"]
+    }
+  });
+}
+
+4. TÍNH WEIGHTED AVERAGE:
+{
+  // Kết hợp các vectors với trọng số tương ứng
+  embeddings.forEach(({ embedding, weight }) => {
+    for (let i = 0; i < vectorLength; i++) {
+      userEmbedding[i] += embedding[i] * weight;
+    }
+    totalWeight += weight;
+  });
+
+  // Normalize vector để chuẩn hóa độ lớn
+  for (let i = 0; i < vectorLength; i++) {
+    userEmbedding[i] /= totalWeight;
+  }
+}
+
+Cache lại user embedding 
+
+graph TD
+    A[User Interactions] --> B[Calculate Weights]
+    B --> C[Apply Time Decay]
+    C --> D[Get Post Embeddings]
+    D --> E[Weighted Average]
+    E --> F[Normalize Vector]
+    F --> G[User Embedding]
+
+
+
+// Bước 1: Thu thập dữ liệu
+- Query tất cả tương tác của user (ratings, favorites, comments)
+- Lấy timestamp của mỗi tương tác
+- Phân loại theo loại tương tác
+
+// Bước 2: Tính trọng số cho mỗi bài viết
+for (mỗi tương tác) {
+  - Lấy trọng số cơ bản theo loại tương tác
+  - Tính time decay: exp(-DECAY_RATE * daysPassed)
+  - Điều chỉnh trọng số theo số lần tương tác
+  - Cộng dồn vào tổng trọng số của bài viết đó
+}
+
+// Bước 3: Normalize trọng số
+- Tìm max và min của tất cả trọng số
+- Normalize về khoảng [0,1]
+- Loại bỏ các bài có trọng số quá thấp
+
+// Bước 4: Lấy embeddings
+- Query Elasticsearch lấy vectors của các bài viết
+- Chỉ lấy các bài có trọng số > 0
+
+// Bước 5: Tính weighted average
+for (mỗi bài viết) {
+  userEmbedding += postEmbedding * weight
+}
+normalize(userEmbedding)
+
+// Bước 6: Cache kết quả
+- Lưu vào cache với TTL
+- Trả về vector cuối cùng

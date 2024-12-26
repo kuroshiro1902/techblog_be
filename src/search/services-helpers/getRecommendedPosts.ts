@@ -5,40 +5,68 @@ import { ENVIRONMENT } from "@/common/environments/environment";
 import { TPost_S } from "../models/post.s.model";
 
 export const getRecommendedPosts = async (
-  userId: number,
-  limit: number = 4
+  userId?: number,
+  limit: number = 4,
+  options?: {
+    excludeIds?: number[];      // Chỉ loại trừ các ID cụ thể nếu cần
+    categoryIds?: number[];     // Filter theo categories
+    minScore?: number;         // Điểm tương đồng tối thiểu
+  }
 ) => {
   if (!Elastic) return [];
 
   try {
-    // 1. Lấy hoặc tạo user embedding
-    const userEmbedding = await getUserEmbedding(userId);
+    // 1. Lấy user embedding
+    const userEmbedding = userId ? await getUserEmbedding(userId) : [];
 
-    // 2. Tìm bài viết dựa trên embedding hoặc trending
+    // 2. Xây dựng query cơ bản
+    const query: any = {
+      bool: {
+        must: [
+          { term: { isPublished: true } }
+        ]
+      }
+    };
+
+    // Thêm excludeIds nếu có (chỉ loại trừ các ID được chỉ định)
+    if (options?.excludeIds?.length) {
+      query.bool.must_not = {
+        terms: { id: options.excludeIds }
+      };
+    }
+
+    // Thêm filter categories nếu có
+    if (options?.categoryIds?.length) {
+      query.bool.must.push({
+        nested: {
+          path: "categories",
+          query: {
+            terms: { "categories.id": options.categoryIds }
+          }
+        }
+      });
+    }
+
+    // 3. Tìm bài viết với script scoring
     const result = await Elastic.search<TPost_S>({
       index: ENVIRONMENT.ELASTIC_POST_INDEX,
       body: {
         query: {
           script_score: {
-            query: {
-              bool: {
-                must: [
-                  { term: { isPublished: true } }
-                ],
-                must_not: {
-                  terms: {
-                    id: (await DB.rating.findMany({
-                      where: { userId },
-                      select: { postId: true }
-                    })).map(r => r.postId)
-                  }
-                }
-              }
-            },
+            query,
             script: {
-              // Nếu không có embedding, dùng công thức tính trending score
-              source: userEmbedding
-                ? "cosineSimilarity(params.user_vector, 'embedding') + 1.0"
+              source: userEmbedding?.length
+                ? `
+                  double similarity = cosineSimilarity(params.user_vector, 'embedding') + 1.0;
+                  if (similarity < params.min_score) return 0;
+                  
+                  // Kết hợp với độ mới của bài viết
+                  long ageInDays = (System.currentTimeMillis() - doc['createdAt'].value.toInstant().toEpochMilli()) / 86400000;
+                  double freshness = Math.exp(-ageInDays / 30.0);
+                  
+                  // 80% similarity, 20% freshness
+                  return similarity * 0.8 + freshness * 0.2;
+                `
                 : `
                   // Tính điểm dựa trên views và ratings
                   double views = doc['views'].value;
@@ -58,30 +86,39 @@ export const getRecommendedPosts = async (
                   long ageInDays = (System.currentTimeMillis() - doc['createdAt'].value.toInstant().toEpochMilli()) / 86400000;
                   double freshness = Math.exp(-ageInDays / 30.0);
                   
-                  // Kết hợp các yếu tố: 40% views, 30% likes, 30% freshness
-                  return normalizedViews * 0.4 * 2.0 + likeRatio * 0.3 * 2.0 + freshness * 0.3 * 2.0;
+                  // Kết hợp các yếu tố: 50% views, 35% likes, 15% freshness
+                  return normalizedViews * 0.5 + likeRatio * 0.35 + freshness * 0.15;
                 `,
-              params: userEmbedding ? { user_vector: userEmbedding } : {}
+              params: {
+                user_vector: userEmbedding || [],
+                min_score: options?.minScore || 0.3
+              }
             }
           }
         },
-        _source: ['id', 'title', 'content', 'slug', 'description', 'views', 'thumbnailUrl', 'author', 'createdAt', 'ratings', 'categories'],
+        _source: ['id', 'title', 'slug', 'views', 'description', 'thumbnailUrl', 'author', 'createdAt', 'ratings', 'categories'],
         size: limit
       }
     });
 
-    return result.hits.hits.map(hit => ({
-      id: +(hit._id ?? ''),
-      title: hit._source?.title ?? '',
-      slug: hit._source?.slug ?? '',
-      description: hit._source?.description ?? null,
-      thumbnailUrl: hit._source?.thumbnailUrl ?? null,
-      author: hit._source?.author ?? null,
-      createdAt: hit._source?.createdAt ?? null,
-      ratings: hit._source?.ratings ?? { likes: 0, dislikes: 0 },
-      categories: hit._source?.categories ?? [],
-      score: hit._score || 0
-    }));
+    console.log('HITS', result.hits.hits);
+
+    // 4. Transform và return kết quả
+    return result.hits.hits
+      .filter(hit => hit._score && hit._score > (options?.minScore || 0.3))
+      .map(hit => ({
+        id: +(hit._id ?? ''),
+        title: hit._source?.title ?? '',
+        slug: hit._source?.slug ?? '',
+        views: hit._source?.views ?? 0,
+        description: hit._source?.description ?? null,
+        thumbnailUrl: hit._source?.thumbnailUrl ?? null,
+        author: hit._source?.author ?? null,
+        createdAt: hit._source?.createdAt ?? null,
+        ratings: hit._source?.ratings ?? { likes: 0, dislikes: 0 },
+        categories: hit._source?.categories ?? [],
+        score: hit._score || 0
+      }));
 
   } catch (error) {
     await Logger.error(`Error getting recommended posts: ${error}`);
