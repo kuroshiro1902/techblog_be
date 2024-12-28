@@ -7,14 +7,16 @@ import { JobServer } from './search/jobs';
 import { AddressInfo } from 'net';
 import { updateMissingEmbeddingsByBatch, updateMissingEmbeddingsJob } from './search/jobs/updateMissingEmbedding.job';
 import { findSimilarPosts } from './search/services-helpers/findSimilarPosts';
+import { initCaches } from './cache';
 
- server.listen(4537, () => {
-   const { address, port } = server.address() as AddressInfo;
-   console.log(`Server is running on ${address}:${port}`);
- });
+server.listen(4537, () => {
+  const { address, port } = server.address() as AddressInfo;
+  console.log(`Server is running on ${address}:${port}`);
+  initCaches();
+});
 
- io.listen(4538)
-// JobServer()
+io.listen(4538)
+JobServer()
 
 //findSimilarPosts(5, 5).then((post) => {
 //  console.log(post.map(p => ({ id: p.id, title: p.title, //score: p.score, views: p.views })))

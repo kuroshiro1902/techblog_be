@@ -8,7 +8,7 @@ import { updatePostWithRevision } from '../helpers/post-versioning.helper';
 import { createSlug } from "../helpers/create-slug.helper";
 import { NotificationService } from "@/notification/services/notification.service";
 
-export const updateOne = async (postId: number, post: z.input<typeof updatePostSchema>, authorId: number) => {
+export const updateOne = async (postId: number, post: z.input<typeof updatePostSchema>, authorId: number, useCategorize = false) => {
   const validatedPost = updatePostSchema.parse(post);
   const validatedPostId = postSchema.shape[EPostField.id].parse(postId);
   const validatedAuthorId = userSchema.shape[EUserField.id].parse(authorId);

@@ -15,28 +15,27 @@ export const updatePostEmbeddings = async (
 
   const successfulIds: string[] = [];
 
-  // Lọc chỉ những bài chưa có description
-  const postsWithoutDescription = posts.filter((post) => !post.description);
-
   // Xử lý theo batches để tránh quá tải
-  for (let i = 0; i < postsWithoutDescription.length; i += BATCH_SIZE) {
-    const batch = postsWithoutDescription.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < posts.length; i += BATCH_SIZE) {
+    const batch = posts.slice(i, i + BATCH_SIZE);
     const operations: Array<any> = [];
 
     try {
-      // 1. Tạo summaries
-      const descriptionsRes = await Promise.allSettled(
-        batch.map((post) => OpenAIService.summaryContent(post.content))
+      // 1. Tạo summaries cho những bài chưa có description
+      const summariesRes = await Promise.allSettled(
+        batch.map((post) =>
+          post.description ? Promise.resolve(post.description) : OpenAIService.summaryContent(post.content)
+        )
       );
 
-      // 2. Lọc các posts có summary thành công
+      // 2. Lọc các bài viết có description thành công
       const embeddingPosts = batch.reduce((acc, post, index) => {
-        const description = descriptionsRes[index];
-        if (description.status === "fulfilled" && description.value) {
-          acc.push({ id: post.id, description: description.value });
-        } else if (description.status === "rejected") {
+        const summary = summariesRes[index];
+        if (summary.status === "fulfilled" && summary.value) {
+          acc.push({ id: post.id, description: summary.value });
+        } else if (summary.status === "rejected") {
           Logger.error(
-            `Failed to create summary for post ${post.id}: ${description.reason}`
+            `Failed to create summary for post ${post.id}: ${summary.reason}`
           );
         }
         return acc;
@@ -64,7 +63,7 @@ export const updatePostEmbeddings = async (
           {
             doc: {
               embedding: embeddings[index],
-              description: post.description,
+              description: post.description, // Cập nhật nếu description được tạo mới
               updatedAt: new Date().toISOString(),
             },
           }

@@ -117,7 +117,7 @@ export const PostController = {
 
   async createPost(req: Request, res: Response) {
     try {
-      const { data } = req.body;
+      const { data, useCategorize } = req.body;
       const authorId = req.user?.[EUserField.id];
       if (!authorId) {
         res
@@ -125,7 +125,7 @@ export const PostController = {
           .json({ isSuccess: false, message: 'Unauthorized.' });
         return;
       }
-      const createdPost = await PostService.createOne(data, authorId);
+      const createdPost = await PostService.createOne(data, authorId, useCategorize);
       res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: createdPost });
     } catch (error) {
       return serverError(res, error);
@@ -133,7 +133,7 @@ export const PostController = {
   },
   async updatePost(req: Request, res: Response) {
     try {
-      const { data } = req.body;
+      const { data, useCategorize } = req.body;
       const authorId = req.user?.[EUserField.id];
       const postId = req.params.postId;
       if (!authorId) {
@@ -142,7 +142,7 @@ export const PostController = {
           .json({ isSuccess: false, message: 'Unauthorized.' });
         return;
       }
-      const updatedPost = await PostService.updateOne(+postId, data, authorId);
+      const updatedPost = await PostService.updateOne(+postId, data, authorId, useCategorize);
       res.status(STATUS_CODE.CREATED).json({ isSuccess: true, data: updatedPost });
     } catch (error) {
       return serverError(res, error);

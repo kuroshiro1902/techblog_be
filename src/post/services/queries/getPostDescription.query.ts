@@ -1,10 +1,10 @@
-import { Elastic } from "@/database/database";
+import { DB, Elastic } from "@/database/database";
 import { Logger } from "@/common/utils/logger.util";
 import { ENVIRONMENT } from "@/common/environments/environment";
 import { OpenAIService } from "@/openai/openai.service";
 import { z } from "zod";
 
-export const getPostDescription = async (postId$: number): Promise<{ description: string }> => {
+export const getPostDescription = async (postId$: number): Promise<{ description: string | null }> => {
   if (!Elastic) {
     throw new Error("Elasticsearch is not available");
   }
@@ -28,12 +28,20 @@ export const getPostDescription = async (postId$: number): Promise<{ description
       return { description: '' };
     }
 
-    // 3. Gọi hàm summaryContent để tóm tắt
-    const description = await OpenAIService.summaryContent(
-      post._source.content
-    );
+    // 2. Nếu không có description trong Elasticsearch thì truy vấn từ DB
+    let description: string | null = (
+      await DB.post.findUnique({ where: { id: postId }, select: { description: true } })
+      ?? { description: null }
+    ).description;
 
-    // 4. Lưu summary vào Elasticsearch
+    if (!description) {
+      // 3. Nếu không có description trong DB, gọi hàm summaryContent để tóm tắt
+      description = await OpenAIService.summaryContent(
+        post._source.content
+      );
+    }
+
+    // 4. Lưu summary vào Elasticsearch và DB
     Elastic.update({
       index: ENVIRONMENT.ELASTIC_POST_INDEX,
       id: postId.toString(),
@@ -41,6 +49,14 @@ export const getPostDescription = async (postId$: number): Promise<{ description
         description
       }
     });
+    DB.post.update({
+      where: {
+        id: postId
+      },
+      data: {
+        description
+      }
+    })
 
     return { description };
 

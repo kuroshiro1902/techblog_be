@@ -168,4 +168,4 @@ async function seedUsers() {
   }
 }
 
-seedCategories()
+prisma.category.findMany().then((d) => console.log({ d }, d[0].id))
