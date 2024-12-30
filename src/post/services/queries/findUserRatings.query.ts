@@ -1,5 +1,6 @@
 import { paginationOptions, paginationSchema, TPageInfo } from "@/common/models/pagination/pagination.model";
 import { DB } from "@/database/database";
+import { ERatingScore } from "@/post/constants/rating-score.const";
 import { EUserField, userSchema } from "@/user/validators/user.schema";
 import { Prisma, Rating } from "@prisma/client";
 import { z } from "zod";
@@ -32,7 +33,7 @@ export const findUserRatings = async (
   });
 
   // WHERE clause
-  const where: Prisma.RatingWhereInput = { userId: input.userId };
+  const where: Prisma.RatingWhereInput = { userId: input.userId, score: { not: ERatingScore.NONE } };
 
   // SELECT clause
   const select = fields.reduce(

@@ -49,8 +49,8 @@ export const findSimilarPosts = async (postId: number, limit: number = 5) => {
                 double normalizedViews = Math.log10(doc['views'].value + 1) / 5.0;
                 if(normalizedViews > 1.0) normalizedViews = 1.0;
 
-                // 3. Kết hợp điểm (70% similarity, 30% views)
-                return similarity * 0.7 + normalizedViews * 0.3 * 2.0;
+                // 3. Kết hợp điểm (85% similarity, 15% views)
+                return similarity * 0.85 + normalizedViews * 0.15 * 2.0;
               `,
               params: {
                 query_vector: sourcePost._source.embedding
@@ -59,7 +59,7 @@ export const findSimilarPosts = async (postId: number, limit: number = 5) => {
           }
         },
         size: limit,
-        _source: ['id', 'title', 'content', 'slug', 'description', 'views', 'thumbnailUrl', 'author', 'createdAt', 'ratings', 'categories']
+        _source: ['id', 'title', 'isPublished', 'content', 'slug', 'description', 'views', 'thumbnailUrl', 'author', 'createdAt', 'ratings', 'categories']
       }
     });
 
@@ -78,6 +78,7 @@ export const findSimilarPosts = async (postId: number, limit: number = 5) => {
           : 0
         )
       },
+      isPublished: hit._source?.isPublished ?? false,
       views: hit._source?.views,
       thumbnailUrl: hit._source?.thumbnailUrl,
       author: hit._source?.author,

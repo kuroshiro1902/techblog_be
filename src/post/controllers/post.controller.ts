@@ -472,6 +472,24 @@ export const PostController = {
       return serverError(res, error);
     }
   },
+  async getSimilarPosts(req: Request, res: Response) {
+    try {
+      const postId = +(req.query.postId ?? '');
+      const limit = +(req.query.pageSize ?? 4);
+
+      if (!postId) {
+        return res.json({ isSuccess: false, data: [], message: 'postId is required!' })
+      }
+      const posts = await SearchService.findSimilarPosts(postId, limit);
+
+      return res.json({
+        isSuccess: true,
+        data: posts
+      });
+    } catch (error) {
+      return serverError(res, error);
+    }
+  },
   async getPostDescription(req: Request, res: Response) {
     try {
       const postId = +req.params.postId;

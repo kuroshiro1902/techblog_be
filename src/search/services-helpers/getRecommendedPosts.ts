@@ -64,8 +64,8 @@ export const getRecommendedPosts = async (
                   long ageInDays = (System.currentTimeMillis() - doc['createdAt'].value.toInstant().toEpochMilli()) / 86400000;
                   double freshness = Math.exp(-ageInDays / 30.0);
                   
-                  // 80% similarity, 20% freshness
-                  return similarity * 0.8 + freshness * 0.2;
+                  // 85% similarity, 15% freshness
+                  return similarity * 0.85 + freshness * 0.15;
                 `
                 : `
                   // Tính điểm dựa trên views và ratings

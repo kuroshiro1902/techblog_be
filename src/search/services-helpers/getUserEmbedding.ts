@@ -2,6 +2,7 @@ import { DB, Elastic } from "@/database/database";
 import { Logger } from "@/common/utils/logger.util";
 import { ENVIRONMENT } from "@/common/environments/environment";
 import { ERatingScore } from "@/post/constants/rating-score.const";
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Định nghĩa trọng số cho từng loại tương tác
 // - LIKE: Tương tác tích cực mạnh nhất
@@ -24,7 +25,7 @@ const ACTION_WEIGHTS = {
 const DECAY_RATE = 0.1;
 
 // Cache để tránh tính toán lại
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+const CACHE_TTL = 5 * 60 * 1000; // 5p
 const userEmbeddingCache = new Map<number, {
   embedding: number[],
   timestamp: Date
@@ -76,7 +77,6 @@ export const getUserEmbedding = async (userId: number) => {
     }>();
 
     const now = new Date();
-    const DAY_MS = 24 * 60 * 60 * 1000;
 
     // Helper function để tính và cập nhật trọng số
     const addInteraction = (
