@@ -8,7 +8,7 @@ import { z } from "zod";
 
 export const categorizeWithAI = async (post: Pick<Post, 'id' | 'description'>) => {
   const { id, description } = post;
-  if (!description) return;
+  if (!description) return [];
 
   try {
     // Nếu cache trống, tải dữ liệu từ cơ sở dữ liệu
@@ -31,16 +31,25 @@ export const categorizeWithAI = async (post: Pick<Post, 'id' | 'description'>) =
       newCategories.forEach((name) => categoryNameCache.add(name)); // Cập nhật cache
     }
 
-    // Liên kết tất cả category với bài viết
-    await DB.post.update({
-      where: { id },
-      data: {
-        categories: {
-          connect: categories.map((name) => ({ name })), // Prisma hỗ trợ connect trực tiếp bằng `name`
+    // Liên kết tất cả category với bài viết và cập nhật lại postlog
+    await DB.$transaction([
+      DB.post.update({
+        where: { id },
+        data: {
+          categories: {
+            connect: categories.map((name) => ({ name })), // Prisma hỗ trợ connect trực tiếp bằng `name`
+          },
         },
-      },
-    });
+      }),
+      DB.postLog.updateMany({
+        where: { postId: id },
+        data: { status: 'NEED_SYNC' }
+      })
+    ])
+
+    return categories;
   } catch (error) {
     console.error('Error during post creation post-process:', error);
+    return [];
   }
 }

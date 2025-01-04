@@ -10,18 +10,32 @@ import { findSimilarPosts } from './search/services-helpers/findSimilarPosts';
 import { syncPostToElasticSearchByBatch, syncPostToElasticSearchJob } from './search/jobs/syncPostToElasticSearch.job';
 import { delay } from './common/utils/delay';
 import { categorizePost } from './openai/service-helpers/categorizePost';
+import { DB, Elastic } from './database/database';
+import { ENVIRONMENT } from './common/environments/environment';
+import { categorizeWithAI } from './post/services/helpers/categorizeWithAI.helper';
+import { summaryContent } from './openai/service-helpers/summaryContent';
 
-// syncPostToElasticSearchByBatch(100)
+// syncPostToElasticSearchByBatch(100);
 
-(async () => {
-  console.log('RUN')
-  const count = await updateMissingEmbeddingsByBatch(5).then(res => res.count)
-  console.log({ count });
-  // // categorizePost('Bài viết tập trung vào 8 vấn đề phổ biến trong thiết kế hệ thống và các giải pháp tương ứng. Đầu tiên, hệ thống đọc nhiều có thể được giải quyết bằng cách sử dụng caching (Redis, Memcached) và nhân bản cơ sở dữ liệu. Ngược lại, hệ thống ghi nhiều nên sử dụng xử lý bất đồng bộ (RabbitMQ, Kafka) và cơ sở dữ liệu LSM-Tree (Cassandra). Điểm lỗi đơn cần được loại bỏ bằng cách triển khai nhiều bản sao và cơ chế chuyển đổi dự phòng. Tính sẵn sàng cao được đảm bảo bằng cân bằng tải (NGINX, AWS ELB) và sao chép dữ liệu. Độ trễ cao có thể giảm bằng CDN và điện toán biên. Việc xử lý tệp lớn có thể dùng block storage hoặc object storage (Amazon S3). Giám sát và cảnh báo cần thiết để phát hiện sự cố, với ELK stack và các công cụ như PagerDuty, Prometheus. Cuối cùng, tối ưu hóa truy vấn cơ sở dữ liệu chậm bằng cách thêm index và sharding. Bài viết kết luận rằng các thách thức trong thiết kế hệ thống là tất yếu, nhưng có thể được quản lý hiệu quả bằng các chiến lược phù hợp.\n')
-  // //   .then((categories) => {
-  // //     console.log({ categories })
-  // //   })
-  // syncPostToElasticSearchJob().then(() => {
+// updateMissingEmbeddingsByBatch(5).then(({ count }) => {
+//   console.log({ count });
+// })
 
-  // }).catch(err => { });
-})()
+const main = async () => {
+  const s = await Elastic?.search<{ categories: { id: number, name: string }[] }>({
+    query: {
+      match_all: {},
+    },
+    size: 300,
+    _source: ['categories'],
+    index: ENVIRONMENT.ELASTIC_POST_INDEX
+  });
+  const docs = s?.hits.hits.flatMap((c) => c._source?.categories).sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0));
+
+  const catSet = new Set(docs?.map((v) => v ? `${v.id}-${v.name}` : 'null'));
+  console.log({ catSet });
+
+  const cats = await DB.category.findMany({ select: { id: true, name: true }, orderBy: { id: 'asc' } })
+  console.log('cats: ', (cats.map((c) => `${c.id}-${c.name}`)));
+
+}

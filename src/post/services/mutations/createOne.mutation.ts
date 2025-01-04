@@ -17,7 +17,7 @@ export const createOne = async (
   const validatedAuthorId = userSchema.shape[EUserField.id].parse(authorId);
 
   // Kiểm tra nội dung và tạo summary cho bài viết
-  const description = await OpenAIService.summaryContent(validatedPost[EPostField.content]);
+  const description = await OpenAIService.summaryContent(`${validatedPost[EPostField.title]}: ${validatedPost[EPostField.content]}`);
 
   // Tạo slug từ title
   const slug = createSlug(validatedPost[EPostField.title]);

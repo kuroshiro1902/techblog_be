@@ -5,7 +5,8 @@ import schedule from "node-schedule";
 import { TPost_S } from "../models/post.s.model";
 import { Logger } from "../../common/utils/logger.util";
 import { removeHtml } from "@/common/utils/removeHtml.util";
-
+import { updatePostEmbeddings } from "../services-helpers/updatePostEmbeddings";
+import { updateMissingEmbeddingsByBatch } from "./updateMissingEmbedding.job";
 
 const condition: Prisma.PostWhereInput = { PostLog: { some: { OR: [{ status: "NOT_SYNCED" }, { status: "NEED_SYNC" }] } } };
 const batchSize = 100;
@@ -69,7 +70,7 @@ export const syncPostToElasticSearchByBatch = async (size = batchSize): Promise<
           id: post.id,
           title: post.title,
           content: removeHtml(post.content),
-          description: post.description || null,
+          description: post.description,
           slug: post.slug,
           thumbnailUrl: post.thumbnailUrl ?? '',
           isPublished: post.isPublished ?? false,
@@ -118,6 +119,8 @@ export const syncPostToElasticSearchByBatch = async (size = batchSize): Promise<
       //Cập nhật status cho các bài viết đã đồng bộ thành công
       const updateStatusRes = await tx.postLog.updateMany({ where: { postId: { in: successfulPostIds } }, data: { status: "SYNCED" } });
 
+      // Cập nhật vector
+      const embeddingCount = await updateMissingEmbeddingsByBatch();
       await Logger.info(`Successfully synced ${successfulPostIds.length} posts`);
       return updateStatusRes;
     } catch (error) {
@@ -131,10 +134,11 @@ export const syncPostToElasticSearchByBatch = async (size = batchSize): Promise<
 }
 
 export const syncPostToElasticSearchJob = async () => {
+  const repeatMinute = 5;
   const syncPostToElasticSearchRule = (() => {
     const jobStartMinute = (new Date().getMinutes() + 1) % 60;
     const rule = new schedule.RecurrenceRule();
-    rule.minute = Array.from({ length: 12 }, (_, i) => (jobStartMinute + i * 5) % 60);
+    rule.minute = Array.from({ length: 12 }, (_, i) => (jobStartMinute + i * repeatMinute) % 60);
     return { jobStartMinute, rule }
   })()
 

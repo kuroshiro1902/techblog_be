@@ -16,14 +16,16 @@ const randomImages = ['https://irpp.org/wp-content/uploads/2021/01/Facebook-Are-
   'https://akm-img-a-in.tosshub.com/indiatoday/images/story/201810/stockvault-person-studying-and-learning---knowledge-concept178241_0.jpeg'
 ];
 
-const pages = Array.from({ length: 10 }, (_, i) => i + 76);
+const pages = Array.from({ length: 10 }, (_, i) => i + 392);
 
 (async () => {
-  const md = new markdown()
-  for (const page of pages) {
-    const { data: res } = await axios.get('https://api.viblo.asia/posts?page=' + page);
+  const md = new markdown();
+  for (const page of pages) { // #1
+    console.log({ page });
+
+    const { data: res } = await axios.get('https://api.viblo.asia/posts?limit=5&page=' + page);
     const rawPosts: any[] = res.data.filter((p: any) => {
-      return md.render(p.contents).length <= 4500 && p.moderation !== 'pending' && !p.title.toLowerCase().includes('viblo')
+      return md.render(p.contents).length <= 4500 && p.moderation !== 'pending' && !p.title.toLowerCase().includes('viblo') && p.system !== 'announcements'
     });
     const userIds = (await DB.user.findMany()).map(u => u.id);
     const posts: z.input<typeof createPostSchema>[] = rawPosts.map((p: any) => {
@@ -49,12 +51,12 @@ const pages = Array.from({ length: 10 }, (_, i) => i + 76);
       }
     });
 
-
-
     for (const post of posts) {
-      const p = await PostService.createOne(post, getRandomValues(userIds, 1)[0]);
+      const p = await PostService.createOne(post, getRandomValues(userIds, 1)[0], true);
       console.log(p.slug);
       await delay(1000);
     }
+
+    await delay(60000)
   }
 })()

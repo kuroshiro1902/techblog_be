@@ -18,16 +18,16 @@ export const NotificationSocketService = {
     return socket.data as TSocketData;
   },
 
-  isUserConnected(userId: number): boolean {
-    const socketConnectionService = SocketConnectionService.getInstance();
-    return !!socketConnectionService.getUserSocket(userId);
-  },
+  // isUserConnected(userId: number): boolean {
+  //   const socketConnectionService = SocketConnectionService.getInstance();
+  //   return !!socketConnectionService.getUserSocket(userId);
+  // },
 
-  emitToUser(userId: number, event: string, data: any): void {
-    const socketConnectionService = SocketConnectionService.getInstance();
-    const userSocket = socketConnectionService.getUserSocket(userId);
-    if (userSocket) {
-      userSocket.emit(event, data);
-    }
-  }
+  // emitToUser(userId: number, event: string, data: any): void {
+  //   const socketConnectionService = SocketConnectionService.getInstance();
+  //   const userSocket = socketConnectionService.getUserSocket(userId);
+  //   if (userSocket) {
+  //     userSocket.emit(event, data);
+  //   }
+  // }
 };

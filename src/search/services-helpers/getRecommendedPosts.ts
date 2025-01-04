@@ -4,6 +4,9 @@ import { getUserEmbedding } from "./getUserEmbedding";
 import { ENVIRONMENT } from "@/common/environments/environment";
 import { TPost_S } from "../models/post.s.model";
 
+const cache: { [userId: number]: { data: any; expiresAt: number } } = {};
+const CACHE_TTL = 10 * 1000; // 10s
+
 export const getRecommendedPosts = async (
   userId?: number,
   limit: number = 4,
@@ -15,20 +18,29 @@ export const getRecommendedPosts = async (
 ) => {
   if (!Elastic) return [];
 
+  if (userId) {
+    const cacheEntry = cache[userId];
+    const now = Date.now();
+
+    // Kiểm tra cache
+    if (cacheEntry && cacheEntry.expiresAt > now) {
+      console.log(`Cache hit for userId: ${userId}`);
+      return cacheEntry.data;
+    }
+  }
+
   try {
-    // 1. Lấy user embedding
+    // Lấy user embedding
     const userEmbedding = userId ? await getUserEmbedding(userId) : [];
 
-    // 2. Xây dựng query cơ bản
+    // Xây dựng query cơ bản
     const query: any = {
       bool: {
-        must: [
-          { term: { isPublished: true } }
-        ]
+        must: [{ term: { isPublished: true } }]
       }
     };
 
-    // Thêm excludeIds nếu có (chỉ loại trừ các ID được chỉ định)
+    // Thêm excludeIds nếu có
     if (options?.excludeIds?.length) {
       query.bool.must_not = {
         terms: { id: options.excludeIds }
@@ -47,7 +59,7 @@ export const getRecommendedPosts = async (
       });
     }
 
-    // 3. Tìm bài viết với script scoring
+    // Tìm bài viết với script scoring
     const result = await Elastic.search<TPost_S>({
       index: ENVIRONMENT.ELASTIC_POST_INDEX,
       body: {
@@ -97,20 +109,19 @@ export const getRecommendedPosts = async (
           }
         },
         _source: ['id', 'title', 'slug', 'views', 'description', 'thumbnailUrl', 'author', 'createdAt', 'ratings', 'categories'],
-        size: limit
+        size: limit,
+        sort: { _score: { order: 'desc' } }
       }
     });
 
-    console.log('HITS', result.hits.hits);
-
-    // 4. Transform và return kết quả
-    return result.hits.hits
+    const posts = result.hits.hits
       .filter(hit => hit._score && hit._score > (options?.minScore || 0.3))
       .map(hit => ({
         id: +(hit._id ?? ''),
         title: hit._source?.title ?? '',
         slug: hit._source?.slug ?? '',
         views: hit._source?.views ?? 0,
+        isPublished: true,
         description: hit._source?.description ?? null,
         thumbnailUrl: hit._source?.thumbnailUrl ?? null,
         author: hit._source?.author ?? null,
@@ -119,6 +130,16 @@ export const getRecommendedPosts = async (
         categories: hit._source?.categories ?? [],
         score: hit._score || 0
       }));
+
+    // Cập nhật cache
+    if (userId) {
+      cache[userId] = {
+        data: posts,
+        expiresAt: Date.now() + CACHE_TTL
+      };
+    }
+
+    return posts;
 
   } catch (error) {
     await Logger.error(`Error getting recommended posts: ${error}`);

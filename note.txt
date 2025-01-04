@@ -21,7 +21,7 @@ dùng middleware để xác thực input, có thể dùng lại middleware cho n
 - [done] Thêm lọc theo category, sort - 17/11/2024
 
 [done] Trang cá nhân user khác
-[] Xác nhận mật khẩu khi đăng ký
+[done] Xác nhận mật khẩu khi đăng ký
 [done] Comment bài viết     !!!!!!!!!!!!!!!!!!!
 [done] Đánh giá bài viết
 

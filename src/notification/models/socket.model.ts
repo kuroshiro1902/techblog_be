@@ -15,8 +15,8 @@ export class Socket {
 
     console.log(`User ${userId} attempting to connect to notification server`);
 
-    // Lưu socket connection mới (tự động ngắt kết nối cũ nếu có)
-    this.socketConnectionService.setUserSocket(userId, socket);
+    // // Lưu socket connection mới (tự động ngắt kết nối cũ nếu có)
+    // this.socketConnectionService.setUserSocket(userId, socket);
 
     // Join room của user
     socket.join(`${userId}`);
@@ -28,7 +28,7 @@ export class Socket {
   private initializeEvents(userId: number): void {
     this.socket.on('disconnect', () => {
       // Khi disconnect, xóa socket khỏi map
-      this.socketConnectionService.removeUserSocket(userId);
+      // this.socketConnectionService.removeUserSocket(userId);
       this.socket.leave(`${userId}`);
       console.log(`User ${userId} disconnected.`);
     });

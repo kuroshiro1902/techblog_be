@@ -52,7 +52,15 @@ export const findUnique = async (query$?: TFindUniquePostQuery): Promise<TPost |
   }
 
   // Fetch posts
-  const post = await DB.post.findUnique({ where, select });
+  // const post = await DB.post.findUnique({ where, select });
+  const post = (await DB.postRevision.findMany({
+    where: { slug: where.slug, post: { isPublished: where.isPublished } }, select: {
+      post: {
+        select
+      }
+    }
+  }))?.[0]?.post;
+
   if (!post?.id) {
     return null;
   }

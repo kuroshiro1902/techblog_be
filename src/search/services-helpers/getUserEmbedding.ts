@@ -25,7 +25,7 @@ const ACTION_WEIGHTS = {
 const DECAY_RATE = 0.1;
 
 // Cache để tránh tính toán lại
-const CACHE_TTL = 5 * 60 * 1000; // 5p
+const CACHE_TTL = 10 * 1000; // 10s
 const userEmbeddingCache = new Map<number, {
   embedding: number[],
   timestamp: Date

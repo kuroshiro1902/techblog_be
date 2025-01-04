@@ -129,7 +129,7 @@ model CommentRating {
   id        Int      @id() @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
-  comment   Comment  @relation(fields: [commentId], references: [id])
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
   commentId Int
   score     Int
   createdAt DateTime @default(now())
