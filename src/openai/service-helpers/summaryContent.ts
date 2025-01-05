@@ -12,7 +12,7 @@ export const summaryContent = async (content: string) => {
     + cleanContent;
 
   const summary = await TEXT_AI(prompt, instruction);
-  if (summary.includes('HARMFUL_CONTENT')) {
+  if (summary?.toUpperCase().includes('HARMFUL_CONTENT')) {
     Logger.error('Nội dung bài viết vi phạm quy định! Vui liệu kiểm tra lại.');
     throw new Error('Nội dung bài viết vi phạm quy định! Vui lòng kiểm tra lại.');
   };

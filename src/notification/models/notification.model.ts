@@ -6,7 +6,7 @@ export type TNewPostCommentNotification = {
    */
   user: Pick<User, 'id' | 'name'>,
   postId: number
-  comment: Pick<Comment, 'content'>
+  comment: Pick<Comment, 'content'> & { replyToId?: number | null };
 }
 
 export type TNewPostNotification = {

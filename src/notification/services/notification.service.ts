@@ -52,37 +52,60 @@ export const NotificationService = {
   },
 
   async handleNewPostComment(input: TNewPostCommentNotification) {
+    console.log('Handle new post ccomment');
+
     const { postId, user, comment } = input;
-    // Lấy danh sách subscribers
-    const { followerIds, ...post } = await PostService.getPostFollowersWithNotification(postId);
 
-    // Loại bỏ userId của người tạo comment khỏi danh sách followers
-    const filteredFollowerIds = followerIds.filter((id) => id !== user.id);
+    try {
+      // Lấy danh sách subscribers
+      const { followerIds, ...post } = await PostService.getPostFollowersWithNotification(postId);
 
-    if (!filteredFollowerIds.length) {
-      return;
+      // Loại bỏ userId của người tạo comment và userId của người được reply khỏi danh sách followers
+      const filteredFollowerIds = followerIds.filter(id => id !== user.id && id !== comment.replyToId);
+
+      // Tạo nội dung thông báo
+      const messageTitle = 'Bình luận mới';
+      const truncatedComment = comment.content.length > 60 ? `${comment.content.substring(0, 60)}...` : comment.content;
+      const messageContent = `<b>${user.name}</b> đã bình luận trong bài viết <b>${post.title}</b>: ${truncatedComment}`;
+
+      // Tạo thông báo trong database
+      this.createNotifications(filteredFollowerIds, 'COMMENT', 'post', postId, messageTitle, messageContent);
+
+      // Chuẩn bị dữ liệu để emit cho những subscribers
+      const notification = { messageTitle, messageContent, post };
+
+      // Gửi sự kiện qua socket cho những subscriber
+      notificationServer
+        .to(filteredFollowerIds.map((id) => `${id}`))
+        .emit(ENotificationEvent.POST_NEW_COMMENT, notification);
+
+      // Nếu là reply, gửi thông báo tới người được reply
+      if (comment.replyToId && comment.replyToId !== user.id) {
+        const replyMessageTitle = 'Phản hồi mới';
+        const replyMessageContent = `<b>${user.name}</b> đã trả lời bình luận của bạn trong bài viết <b>${post.title}</b>: ${truncatedComment}`;
+        this.createNotifications([comment.replyToId], 'COMMENT', 'post', postId, replyMessageTitle, replyMessageContent);
+
+        // Gửi thông báo cho người được reply
+        notificationServer
+          .to(`${comment.replyToId}`)
+          .emit(ENotificationEvent.POST_NEW_COMMENT, {
+            messageTitle: replyMessageTitle,
+            messageContent: replyMessageContent,
+            post
+          });
+
+        console.log('Đã gửi thông báo cho người được reply!');
+
+      }
+
+      console.log(
+        `Notification sent for new comment on postId: ${postId} by userId: ${user.id} to followers: ${filteredFollowerIds.join(', ')}`
+      );
+    } catch (error) {
+      console.error(`Error in handleNewPostComment for postId: ${postId}`, error);
     }
-
-    // Tạo nội dung thông báo
-    const messageTitle = 'Bình luận mới';
-    const truncatedComment = comment.content.length > 60 ? `${comment.content.substring(0, 60)}...` : comment.content;
-    const messageContent = `<b>${user.name}</b> đã bình luận trong bài viết <b>${post.title}</b>: ${truncatedComment}`;
-
-    // Tạo thông báo trong database
-    await this.createNotifications(filteredFollowerIds, 'COMMENT', 'post', postId, messageTitle, messageContent);
-
-    // Chuẩn bị dữ liệu để emit
-    const notification = { messageTitle, messageContent, post };
-
-    // Gửi sự kiện qua socket
-    notificationServer
-      .to(filteredFollowerIds.map((id) => `${id}`))
-      .emit(ENotificationEvent.POST_NEW_COMMENT, notification);
-
-    console.log(
-      `Notification sent for new comment on postId: ${postId} by userId: ${user.id} to followers: ${filteredFollowerIds}`
-    );
   },
+
 
   async handleNewPost(input: TNewPostNotification, type: 'create' | 'update') {
 

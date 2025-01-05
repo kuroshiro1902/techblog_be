@@ -18,27 +18,31 @@ export const createComment = async (
   const validatedComment = createCommentSchema.parse(comment);
   const validatedAuthorId = userSchema.shape[EUserField.id].parse(authorId);
 
-  // Nếu không có postId, lấy từ parent comment
+  // Determine postId and replyToId
   let postId: number;
-  if (validatedComment.postId) {
-    postId = postSchema.shape[EPostField.id].parse(validatedComment.postId);
-  } else if (validatedComment.parentCommentId) {
+  let replyToId: number | null = null;
+
+  if (validatedComment.parentCommentId) {
     const parentComment = await DB.comment.findUnique({
       where: { id: validatedComment.parentCommentId },
-      select: { postId: true }
+      select: { postId: true, userId: true }
     });
+
     if (!parentComment) {
-      throw new Error('Bình luận này không còn khả dụng để trả lời');
+      throw new Error('Parent comment not found or no longer available for replies.');
     }
     postId = parentComment.postId;
+    replyToId = parentComment.userId;
+  } else if (validatedComment.postId) {
+    postId = postSchema.shape[EPostField.id].parse(validatedComment.postId);
   } else {
-    throw new Error('Bình luận không này không được chỉ định bài viết hoặc bình luận trả lời.');
+    throw new Error('Comment must be associated with a post or reply to an existing comment.');
   }
 
-  // Kiểm tra nội dung bình luận có vi phạm quy định hay không và trả về sắc thái bình luận
+  // Check comment content for compliance and determine sentiment
   const impScore = await OpenAIService.analyzeCommentSentiment(validatedComment.content);
 
-  // Create comment
+  // Create the new comment in the database
   const createdComment = await DB.comment.create({
     data: {
       impScore: isNaN(+impScore) ? null : +impScore,
@@ -58,11 +62,19 @@ export const createComment = async (
     select: COMMENT_SELECT
   });
 
+  // Send notifications
   NotificationService.handleNewPostComment({
     postId,
-    comment: { content: createdComment.content },
-    user: { name: createdComment.user.name, id: createdComment.userId ?? createdComment.user.id }
+    comment: {
+      content: createdComment.content,
+      replyToId // Reply target ID, if any
+    },
+    user: {
+      name: createdComment.user.name,
+      id: createdComment.userId ?? validatedAuthorId
+    }
   });
 
   return createdComment;
 };
+

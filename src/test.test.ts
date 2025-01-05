@@ -21,21 +21,47 @@ import { summaryContent } from './openai/service-helpers/summaryContent';
 //   console.log({ count });
 // })
 
-const main = async () => {
-  const s = await Elastic?.search<{ categories: { id: number, name: string }[] }>({
-    query: {
-      match_all: {},
-    },
-    size: 300,
-    _source: ['categories'],
-    index: ENVIRONMENT.ELASTIC_POST_INDEX
-  });
-  const docs = s?.hits.hits.flatMap((c) => c._source?.categories).sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0));
+// const main = async () => {
+//   const s = await Elastic?.search<{ categories: { id: number, name: string }[] }>({
+//     query: {
+//       match_all: {},
+//     },
+//     size: 300,
+//     _source: ['categories'],
+//     index: ENVIRONMENT.ELASTIC_POST_INDEX
+//   });
+//   const docs = s?.hits.hits.flatMap((c) => c._source?.categories).sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0));
 
-  const catSet = new Set(docs?.map((v) => v ? `${v.id}-${v.name}` : 'null'));
-  console.log({ catSet });
+//   const catSet = new Set(docs?.map((v) => v ? `${v.id}-${v.name}` : 'null'));
+//   console.log({ catSet });
 
-  const cats = await DB.category.findMany({ select: { id: true, name: true }, orderBy: { id: 'asc' } })
-  console.log('cats: ', (cats.map((c) => `${c.id}-${c.name}`)));
+//   const cats = await DB.category.findMany({ select: { id: true, name: true }, orderBy: { id: 'asc' } })
+//   console.log('cats: ', (cats.map((c) => `${c.id}-${c.name}`)));
 
-}
+// }
+
+const C = async () => {
+  console.log('C1');
+};
+
+const D = async () => {
+  console.log('D1');
+};
+
+const B = async () => {
+  console.log('B1');
+  process.nextTick(() => console.log('next tick'))
+  await C();
+  D();
+  console.log('B2');
+};
+
+const A = async () => {
+  console.log('A1');
+  B();
+  console.log('A2');
+};
+
+
+A();
+

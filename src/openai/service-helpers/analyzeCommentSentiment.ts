@@ -12,21 +12,21 @@ export const analyzeCommentSentiment = async (content: string): Promise<number> 
     const result = (await TEXT_AI(
       removeHtml(content),
       "Bạn là một trợ lý đánh giá sắc thái bình luận của người dùng trên trang web bài viết về công nghệ."
-      + " Hãy đánh giá sắc thái bình luận, nếu bình luận là nội dung bạo lực, xúc phạm, kì thị hay không phù hợp thì trả về 'HARM', "
+      + " Hãy đánh giá sắc thái bình luận, nếu bình luận là nội dung bạo lực, xúc phạm, kì thị hay không phù hợp thì trả về 'HARM_CONTENT', "
       + " nếu không thì trả về kết quả như sau:"
       + " NEG (Nếu người dùng thể hiện sự không thích bài viết),"
       + " NEU (Nếu người dùng có sự trung tính hoặc không thích ở mức độ vừa phải),"
       + " POS (Nếu người dùng thể hiện sự thích bài viết).",
       { temperature: 0.3 }
-    )).trim();
+    ))?.trim().toUpperCase();
 
     console.log({ result });
 
-    if (result.includes("HARM")) {
+    if (result?.includes("HARM_CONTENT")) {
       throw new Error('Nội dung bình luận vi phạm quy định! Vui lòng kiểm tra lại.');
     }
 
-    return result.includes("NEG") ? -1 : result.includes("POS") ? 1 : 0;
+    return result?.includes("NEG") ? -1 : result?.includes("POS") ? 1 : 0;
   } catch (error) {
     await Logger.error('Error analyzing comment sentiment: ' + error);
     console.log('Error analyzing comment sentiment: ' + error);

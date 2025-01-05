@@ -31,18 +31,18 @@ export const categorizePost = async (content: string): Promise<string[]> => {
   try {
     // Gửi yêu cầu đến AI và xử lý kết quả trả về
     const res = await TEXT_AI(prompt, instruction, { temperature: 0.75 });
-    const categories = res.split(',').map((c) => c.trim()).filter((c) => c.length > 0);
+    const categories = res?.split(',').map((c) => c.trim()).filter((c) => c.length > 0);
 
     setImmediate(async () => {
       // Cập nhật cache với các thể loại mới
-      categories.forEach((category) => {
+      categories?.forEach((category) => {
         if (!categoryNameCache.has(category)) {
           categoryNameCache.add(category);
         }
       });
     })
 
-    return categories;
+    return categories ?? [];
   } catch (error) {
     Logger.error('Error categorizing post: ' + error);
     return [];
