@@ -498,5 +498,15 @@ export const PostController = {
     } catch (error) {
       return serverError(res, error);
     }
+  },
+
+  async getRelativeKeywords(req: Request, res: Response) {
+    try {
+      const search = req.query.search;
+      const keywords = await SearchService.suggestRelativeKeywords(search as string);
+      return res.json({ isSuccess: true, data: keywords ?? [] });
+    } catch (error) {
+      return serverError(res, error);
+    }
   }
 };

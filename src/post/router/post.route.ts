@@ -37,4 +37,6 @@ postRouter.get("/favorites", authMiddleware, PostController.getFavoritePosts);
 postRouter.delete("/favorite/:postId", authMiddleware, PostController.deleteFavoritePost);
 
 postRouter.post('/notification/:postId', authMiddleware, PostController.changePostNotification);
+
+postRouter.get('/relative-keywords', PostController.getRelativeKeywords);
 export default postRouter;

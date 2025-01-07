@@ -71,6 +71,7 @@ export const searchPosts = async (query?: TSearchPostQuery): Promise<{ data: TPo
         query: input.search,
         fields: ['title^2', 'content', /*'author.name', 'categories.name'*/],
         fuzziness: 'AUTO'
+        // fuzziness: 2 // Tối đa 2 kí tự sai chính tả, elasticsearch chỉ hỗ trợ [0, 1, 2]
       }
     });
   }
