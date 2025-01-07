@@ -5,7 +5,7 @@ import notificationServer from './notification/notification.server';
 import io from './socket/io';
 import { JobServer } from './search/jobs';
 import { AddressInfo } from 'net';
-import { updateMissingEmbeddingsByBatch, updateMissingEmbeddingsJob } from './search/jobs/updateMissingEmbedding.job';
+import { updateExistEmbeddingsByBatch, updateMissingEmbeddingsByBatch, updateMissingEmbeddingsJob } from './search/jobs/updateMissingEmbedding.job';
 import { findSimilarPosts } from './search/services-helpers/findSimilarPosts';
 import { syncPostToElasticSearchByBatch, syncPostToElasticSearchJob } from './search/jobs/syncPostToElasticSearch.job';
 import { delay } from './common/utils/delay';
@@ -40,28 +40,15 @@ import { summaryContent } from './openai/service-helpers/summaryContent';
 
 // }
 
-const C = async () => {
-  console.log('C1');
-};
 
-const D = async () => {
-  console.log('D1');
-};
+const main = async () => {
+  let count = 1;
+  while (count > 0) {
+    count = (await updateExistEmbeddingsByBatch(5)).count;
+    console.log({ count });
 
-const B = async () => {
-  console.log('B1');
-  process.nextTick(() => console.log('next tick'))
-  await C();
-  D();
-  console.log('B2');
-};
+    await delay(30000);
+  }
+}
 
-const A = async () => {
-  console.log('A1');
-  B();
-  console.log('A2');
-};
-
-
-A();
-
+main();

@@ -11,6 +11,10 @@ export const getRecommendedPosts = async (
   userId?: number,
   limit: number = 4,
   options?: {
+    /**
+     * Nếu chỉ định user embedding, embedding này sẽ được sử dụng luôn thay vì phải tính toán user embedding từ userId.
+     */
+    userEmbedding?: number[]
     excludeIds?: number[];      // Chỉ loại trừ các ID cụ thể nếu cần
     categoryIds?: number[];     // Filter theo categories
     minScore?: number;         // Điểm tương đồng tối thiểu
@@ -18,7 +22,7 @@ export const getRecommendedPosts = async (
 ) => {
   if (!Elastic) return [];
 
-  if (userId) {
+  if (userId && (!options?.userEmbedding || options.userEmbedding.length !== 768)) {
     const cacheEntry = cache[userId];
     const now = Date.now();
 
@@ -31,7 +35,9 @@ export const getRecommendedPosts = async (
 
   try {
     // Lấy user embedding
-    const userEmbedding = userId ? await getUserEmbedding(userId) : [];
+    const userEmbedding = (options?.userEmbedding && options.userEmbedding.length === 768)
+      ? options?.userEmbedding
+      : (userId ? await getUserEmbedding(userId) : []);
 
     // Xây dựng query cơ bản
     const query: any = {
@@ -103,7 +109,7 @@ export const getRecommendedPosts = async (
                 `,
               params: {
                 user_vector: userEmbedding || [],
-                min_score: options?.minScore || 0.3
+                min_score: options?.minScore || 0.2
               }
             }
           }

@@ -206,6 +206,10 @@ export const getUserEmbedding = async (userId: number) => {
       timestamp: new Date()
     });
 
+    if (userEmbedding.every((v) => v === 0)) {
+      return [];
+    }
+
     return userEmbedding;
 
   } catch (error) {

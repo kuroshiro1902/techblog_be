@@ -23,8 +23,8 @@ export const TEXT_AI = (input: string, instruction: string, config?: { temperatu
 }).then(res => res.choices[0].message.content ?? '');
 
 export const EMBEDDING_AI = (input: string) => OpenAI.embeddings.create({
-  // model: "text-embedding-ada-002",
-  model: "text-embedding-3-small", // cheaper
+  // model: "text-embedding-ada-002", // cheaper
+  model: "text-embedding-3-small", // stronger
   dimensions: 768,
   input
 }).then(res => res.data[0].embedding);

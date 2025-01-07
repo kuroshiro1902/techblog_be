@@ -6,7 +6,7 @@ import {
 } from './openai';
 
 import { env } from 'process';
-import { GenerationConfig, GenerativeAI } from '@/generative';
+import { GenerationConfig, GenerativeAI } from '@/config';
 
 const apiTokens = [
   env.GENERATIVE_API_TOKEN1!,

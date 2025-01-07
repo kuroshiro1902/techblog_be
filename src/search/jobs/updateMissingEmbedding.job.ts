@@ -76,3 +76,46 @@ export const updateMissingEmbeddingsJob = async () => {
     console.log({ syncCount });
   });
 }
+
+export const updateExistEmbeddingsByBatch = async (size = batchSize): Promise<{ count: number }> => {
+  if (!Elastic) {
+    await Logger.warn('Elastic is not available, embeddings cannot be updated!!!');
+    return { count: 0 };
+  }
+
+  try {
+    // Tìm các bài viết chưa có embedding
+    const result = await Elastic.search<TPost_S>({
+      index: ENVIRONMENT.ELASTIC_POST_INDEX,
+      body: {
+        query: {
+          bool: {
+            should: [
+              { bool: { must_not: { exists: { field: "embedding_updated_at" } }, must: { term: { isPublished: true } } } },
+            ],
+            minimum_should_match: 1
+          }
+        },
+        _source: ["id", "content"],
+        size
+      }
+    });
+
+    const postsToUpdate = result.hits.hits.map(hit => ({
+      id: +hit._id!,
+      content: hit._source?.content ?? ""
+    }));
+
+    if (postsToUpdate.length <= 0) {
+      await Logger.info('No posts need embedding update');
+      return { count: 0 };
+    }
+
+    const res = await updatePostEmbeddings(postsToUpdate, true);
+    await Logger.info(`Updated ${res.length} posts: ${res.join(', ')}`);
+    return { count: res.length };
+  } catch (error) {
+    await Logger.error(`Error updating embeddings: ${error}`);
+    throw error;
+  }
+};

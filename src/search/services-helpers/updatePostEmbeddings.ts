@@ -6,7 +6,8 @@ import { OpenAIService } from "@/openai/openai.service";
 const BATCH_SIZE = 5; // Giới hạn số lượng xử lý mỗi lần
 
 export const updatePostEmbeddings = async (
-  posts: Array<{ id: number; content: string; description?: string | null }>
+  posts: Array<{ id: number; content: string; description?: string | null }>,
+  updatedEmbeddingMark = false
 ) => {
   if (!Elastic) {
     console.warn("Elastic is not available");
@@ -21,10 +22,11 @@ export const updatePostEmbeddings = async (
     const operations: Array<any> = [];
 
     try {
+
       // 1. Tạo summaries cho những bài chưa có description
       const summariesRes = await Promise.allSettled(
         batch.map((post) =>
-          post.description ? Promise.resolve(post.description) : OpenAIService.summaryContent(post.content)
+          !!post.description ? Promise.resolve(post.description) : OpenAIService.summaryContent(post.content)
         )
       );
 
@@ -51,9 +53,10 @@ export const updatePostEmbeddings = async (
           )
           : [await OpenAIService.createEmbedding(embeddingPosts[0].description)];
 
+      const updatedAt = new Date().toISOString();
       // 4. Chuẩn bị operations cho bulk update
       embeddingPosts.forEach((post, index) => {
-        operations.push(
+        embeddings?.[index] && embeddings?.[index].length === 768 ? operations.push(
           {
             update: {
               _index: ENVIRONMENT.ELASTIC_POST_INDEX,
@@ -62,12 +65,13 @@ export const updatePostEmbeddings = async (
           },
           {
             doc: {
-              embedding: embeddings[index],
+              embedding: embeddings![index],
               description: post.description, // Cập nhật nếu description được tạo mới
-              updatedAt: new Date().toISOString(),
+              updatedAt: updatedAt,
+              embedding_updated_at: updatedEmbeddingMark ? updatedAt : undefined
             },
           }
-        );
+        ) : undefined;
       });
 
       // 5. Thực hiện bulk update
